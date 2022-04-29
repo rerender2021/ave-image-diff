@@ -4,16 +4,15 @@
   "description": "quick start for ave-ui",
   "main": "src/index.js",
   "scripts": {
-    "dev": "tsnd --respawn --transpile-only ./src/index.ts"
+    "dev": "tsnd --respawn ./src/index.ts"
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^17.0.21",
+    "ave-ui": "^0.1.4",
     "ts-node-dev": "^1.1.8",
     "typescript": "^4.6.2"
   },
-  "dependencies": {
-    "ave-ui": "0.0.2"
-  }
+  "dependencies": {}
 }
