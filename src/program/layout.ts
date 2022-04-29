@@ -3,11 +3,12 @@ import { GridLayout } from "../components";
 
 export function getAppLayout(window: Window) {
 	const containerLayout = {
-		rows: "1",
+		rows: "1 1",
 		columns: "1 1",
 		areas: {
 			baseline: { x: 0, y: 0 },
 			current: { x: 1, y: 0 },
+			diff: { x: 1, y: 1 },
 		},
 	};
 
