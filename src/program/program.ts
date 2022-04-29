@@ -1,8 +1,7 @@
 import { App, WindowCreation, Window, WindowFlag, Pager, AlignType, ResourceSource } from "ave-ui";
 import { ImageView } from "../components";
 import { getAppLayout } from "./layout";
-import * as fs from "fs";
-import { assetPath } from "../utils";
+import { createResourceSourceFromAsset } from "../utils";
 
 export class Program {
 	app: App;
@@ -10,6 +9,9 @@ export class Program {
 
 	baselinePager: Pager;
 	baselineImage: ImageView;
+
+	currentPager: Pager;
+	currentImage: ImageView;
 
 	constructor() {
 		this.app = new App();
@@ -40,6 +42,14 @@ export class Program {
 			this.baselinePager.SetContentVerticalAlign(AlignType.Center);
 
 			//
+			this.currentImage = new ImageView(window);
+
+			this.currentPager = new Pager(window);
+			this.currentPager.SetContent(this.currentImage.control);
+			this.currentPager.SetContentHorizontalAlign(AlignType.Center);
+			this.currentPager.SetContentVerticalAlign(AlignType.Center);
+
+			//
 			const container = this.onCreateLayout(window);
 			window.SetContent(container);
 			this.onInit();
@@ -49,15 +59,15 @@ export class Program {
 
 	onInit() {
 		const codec = this.app.GetImageCodec();
-		const resourceSource = ResourceSource.FromBuffer(fs.readFileSync(assetPath("square-baseline.png")));
-		const aveImage = codec.Open(resourceSource);
-		this.baselineImage.updateRawImage(aveImage);
+		this.baselineImage.updateRawImage(codec.Open(createResourceSourceFromAsset("square-baseline.png")));
+		this.currentImage.updateRawImage(codec.Open(createResourceSourceFromAsset("square-current.png")));
 	}
 
 	onCreateLayout(window: Window) {
 		const { container } = getAppLayout(window);
 
 		container.addControl(this.baselinePager, container.areas.baseline);
+		container.addControl(this.currentPager, container.areas.current);
 
 		return container.control;
 	}
