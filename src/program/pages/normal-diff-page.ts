@@ -1,7 +1,10 @@
 import { AlignType, Pager, ResourceSource, Vec2 } from "ave-ui";
+import { autorun } from "mobx";
 import { GridLayout, ImageView, Page, ZoomView } from "../../components";
 import { assetBuffer } from "../../utils";
+import { BlinkView } from "../components/blink-view";
 import { DiffView } from "../components/diff-view";
+import { state } from "../state";
 
 export class NormalDiffPage extends Page {
 	baselinePager: Pager;
@@ -13,6 +16,7 @@ export class NormalDiffPage extends Page {
 	currentSource: ResourceSource;
 
 	diffView: DiffView;
+	blinkView: BlinkView;
 
 	baselineZoomView: ZoomView;
 	currentZoomView: ZoomView;
@@ -42,6 +46,8 @@ export class NormalDiffPage extends Page {
 
 		//
 		this.diffView = new DiffView(window, this.app);
+		this.blinkView = new BlinkView(window, this.app);
+		this.blinkView.hide();
 
 		[this.diffView, this.baselineImage, this.currentImage].forEach((each) => {
 			each.control.OnPointerMove((sender, mp) => {
@@ -51,6 +57,7 @@ export class NormalDiffPage extends Page {
 		});
 
 		this.update();
+		this.watch();
 
 		//
 		const container = this.onCreateLayout();
@@ -67,8 +74,8 @@ export class NormalDiffPage extends Page {
 			areas: {
 				baseline: { x: 1, y: 1 },
 				current: { x: 3, y: 1 },
-				diff: { x: 3, y: 3 },
-				zoom: { x: 1, y: 3 },
+				diff: { x: 1, y: 3 },
+				zoom: { x: 3, y: 3 },
 				control: { x: 5, y: 1 },
 			},
 		};
@@ -87,7 +94,8 @@ export class NormalDiffPage extends Page {
 
 		container.addControl(this.baselinePager, container.areas.baseline);
 		container.addControl(this.currentPager, container.areas.current);
-		container.addControl(this.diffView.pager, container.areas.diff);
+		container.addControl(this.diffView.control, container.areas.diff);
+		container.addControl(this.blinkView.control, container.areas.diff);
 
 		//
 		container.addControl(zoomGrid.control, container.areas.zoom);
@@ -95,6 +103,16 @@ export class NormalDiffPage extends Page {
 		zoomGrid.addControl(this.currentZoomView.control, zoomGrid.areas.current);
 
 		return container;
+	}
+
+	watch() {
+		autorun(() => {
+			if (state.blink) {
+				this.blinkView.show();
+			} else {
+				this.blinkView.hide();
+			}
+		});
 	}
 
 	update() {
