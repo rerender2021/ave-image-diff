@@ -1,5 +1,5 @@
 import { AlignType, Pager, ResourceSource } from "ave-ui";
-import { GridLayout, ImageView, Page, ZoomView } from "../../components";
+import { GridLayout, ImageView, Page } from "../../components";
 import { assetBuffer } from "../../utils";
 import * as pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
@@ -66,8 +66,6 @@ export class BlinkDiffPage extends Page {
 	}
 
 	update() {
-		const { window } = this;
-
 		const codec = this.app.GetImageCodec();
 
 		const baselineBuffer = assetBuffer("map-baseline.png");
