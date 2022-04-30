@@ -53,7 +53,7 @@ export class BlinkDiffPage extends Page {
 		const container = new GridLayout<keyof typeof containerLayout.areas>(window, containerLayout);
 
 		container.addControl(this.blinkPager, container.areas.blink);
-		container.addControl(this.diffView.grid, container.areas.diff);
+		container.addControl(this.diffView.pager, container.areas.diff);
 
 		return container;
 	}

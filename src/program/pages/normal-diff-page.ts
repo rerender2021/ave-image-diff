@@ -87,7 +87,7 @@ export class NormalDiffPage extends Page {
 
 		container.addControl(this.baselinePager, container.areas.baseline);
 		container.addControl(this.currentPager, container.areas.current);
-		container.addControl(this.diffView.grid, container.areas.diff);
+		container.addControl(this.diffView.pager, container.areas.diff);
 
 		//
 		container.addControl(zoomGrid.control, container.areas.zoom);
