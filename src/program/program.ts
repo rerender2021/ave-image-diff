@@ -94,8 +94,8 @@ export class Program {
 	update() {
 		const codec = this.app.GetImageCodec();
 
-		const baselineBuffer = assetBuffer("square-baseline.png");
-		const currentBuffer = assetBuffer("square-current.png");
+		const baselineBuffer = assetBuffer("map-baseline.png");
+		const currentBuffer = assetBuffer("map-current.png");
 
 		this.baselineImage.updateRawImage(codec.Open(ResourceSource.FromBuffer(baselineBuffer)));
 		this.currentImage.updateRawImage(codec.Open(ResourceSource.FromBuffer(currentBuffer)));

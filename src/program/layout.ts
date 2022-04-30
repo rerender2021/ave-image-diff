@@ -3,13 +3,13 @@ import { GridLayout } from "../components";
 
 export function getAppLayout(window: Window) {
 	const containerLayout = {
-		rows: "1 1",
-		columns: "1 1",
+		rows: "32dpx 1 32dpx 1 32dpx",
+		columns: "32dpx 1 32dpx 1 32dpx",
 		areas: {
-			baseline: { x: 0, y: 0 },
-			current: { x: 1, y: 0 },
-			diff: { x: 1, y: 1 },
-			zoom: { x: 0, y: 1 },
+			baseline: { x: 1, y: 1 },
+			current: { x: 3, y: 1 },
+			diff: { x: 3, y: 3 },
+			zoom: { x: 1, y: 3 },
 		},
 	};
 
