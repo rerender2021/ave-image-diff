@@ -4,6 +4,8 @@ import { App, Window } from "ave-ui";
 
 export interface IPage {
 	onCreate(): GridLayout;
+	show(): void;
+	hide(): void;
 }
 
 export abstract class Page extends Component implements IPage {
@@ -24,5 +26,13 @@ export abstract class Page extends Component implements IPage {
 
 	private create() {
 		this.layout = this.onCreate();
+	}
+
+	show(): void {
+		this.layout.control.SetVisible(true);
+	}
+
+	hide(): void {
+		this.layout.control.SetVisible(false);
 	}
 }

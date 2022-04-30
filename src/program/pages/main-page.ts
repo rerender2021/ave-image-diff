@@ -19,12 +19,13 @@ export class MainPage extends Page {
 		this.blinkCheckBox.OnCheck((sender: CheckBox) => {
 			const checkValue = sender.GetValue();
 			this.inBlinkMode = checkValue === CheckValue.Checked;
-			console.log(`in blink mode: ${this.inBlinkMode}`);
+			this.swichDiffPage();
 		});
 
 		//
 		this.normalDiffPage = new NormalDiffPage(window, this.app);
 		this.blinkDiffPage = new BlinkDiffPage(window, this.app);
+		this.blinkDiffPage.hide();
 
 		const container = this.onCreateLayout();
 		return container;
@@ -53,11 +54,22 @@ export class MainPage extends Page {
 		};
 		const controlGrid = new GridLayout<keyof typeof controlLayout.areas>(window, controlLayout);
 
+		container.addControl(this.normalDiffPage.control, container.areas.main);
 		container.addControl(this.blinkDiffPage.control, container.areas.main);
 		container.addControl(controlGrid.control, container.areas.control);
 
 		controlGrid.addControl(this.blinkCheckBox, controlGrid.areas.blink);
 
 		return container;
+	}
+
+	swichDiffPage() {
+		if (this.inBlinkMode) {
+			this.normalDiffPage.hide();
+			this.blinkDiffPage.show();
+		} else {
+			this.normalDiffPage.show();
+			this.blinkDiffPage.hide();
+		}
 	}
 }
