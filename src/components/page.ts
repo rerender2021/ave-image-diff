@@ -1,6 +1,6 @@
 import { Component } from "./component";
 import { GridLayout } from "./layout";
-import { Window } from "ave-ui";
+import { App, Window } from "ave-ui";
 
 export interface IPage {
 	onCreate(): GridLayout;
@@ -8,9 +8,11 @@ export interface IPage {
 
 export abstract class Page extends Component implements IPage {
 	private layout: GridLayout;
+	app: App;
 
-	constructor(window: Window) {
+	constructor(window: Window, app: App) {
 		super(window);
+		this.app = app;
 		this.create();
 	}
 
