@@ -5,7 +5,7 @@ import { PNG } from "pngjs";
 import { state } from "../state";
 import { autorun } from "mobx";
 
-export class DiffView extends Component {
+export class NormalDiffView extends Component {
 	private view: ImageView;
 	private pager: Pager;
 	private baseline: Buffer;
@@ -60,5 +60,13 @@ export class DiffView extends Component {
 		// fs.writeFileSync("diff.png", diffBuffer);
 		const codec = this.app.GetImageCodec();
 		this.view.updateRawImage(codec.Open(ResourceSource.FromBuffer(diffBuffer)));
+	}
+
+	show(): void {
+		this.pager.SetVisible(true);
+	}
+
+	hide(): void {
+		this.pager.SetVisible(false);
 	}
 }

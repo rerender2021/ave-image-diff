@@ -2,8 +2,8 @@ import { AlignType, Pager, ResourceSource, Vec2 } from "ave-ui";
 import { autorun } from "mobx";
 import { GridLayout, ImageView, Page, ZoomView } from "../../components";
 import { assetBuffer } from "../../utils";
-import { BlinkView } from "../components/blink-view";
-import { DiffView } from "../components/diff-view";
+import { BlinkDiffView } from "../components/blink-diff-view";
+import { NormalDiffView } from "../components/normal-diff-view";
 import { state } from "../state";
 
 export class NormalDiffPage extends Page {
@@ -15,8 +15,8 @@ export class NormalDiffPage extends Page {
 	currentImage: ImageView;
 	currentSource: ResourceSource;
 
-	diffView: DiffView;
-	blinkView: BlinkView;
+	normalDiffView: NormalDiffView;
+	blinkDiffView: BlinkDiffView;
 
 	baselineZoomView: ZoomView;
 	currentZoomView: ZoomView;
@@ -45,11 +45,10 @@ export class NormalDiffPage extends Page {
 		this.currentPager.SetContentVerticalAlign(AlignType.Center);
 
 		//
-		this.diffView = new DiffView(window, this.app);
-		this.blinkView = new BlinkView(window, this.app);
-		this.blinkView.hide();
+		this.normalDiffView = new NormalDiffView(window, this.app);
+		this.blinkDiffView = new BlinkDiffView(window, this.app);
 
-		[this.diffView, this.baselineImage, this.currentImage].forEach((each) => {
+		[this.normalDiffView, this.baselineImage, this.currentImage].forEach((each) => {
 			each.control.OnPointerMove((sender, mp) => {
 				const pos = mp.Position;
 				this.onPointerMove(pos);
@@ -94,8 +93,8 @@ export class NormalDiffPage extends Page {
 
 		container.addControl(this.baselinePager, container.areas.baseline);
 		container.addControl(this.currentPager, container.areas.current);
-		container.addControl(this.diffView.control, container.areas.diff);
-		container.addControl(this.blinkView.control, container.areas.diff);
+		container.addControl(this.normalDiffView.control, container.areas.diff);
+		container.addControl(this.blinkDiffView.control, container.areas.diff);
 
 		//
 		container.addControl(zoomGrid.control, container.areas.zoom);
@@ -108,9 +107,11 @@ export class NormalDiffPage extends Page {
 	watch() {
 		autorun(() => {
 			if (state.blink) {
-				this.blinkView.show();
+				this.blinkDiffView.show();
+				this.normalDiffView.hide();
 			} else {
-				this.blinkView.hide();
+				this.normalDiffView.show();
+				this.blinkDiffView.hide();
 			}
 		});
 	}
@@ -128,7 +129,7 @@ export class NormalDiffPage extends Page {
 		this.currentImage.updateRawImage(codec.Open(this.currentSource));
 
 		//
-		this.diffView.update(baselineBuffer, currentBuffer);
+		this.normalDiffView.update(baselineBuffer, currentBuffer);
 
 		//
 		this.baselineZoomView.track({ image: this.baselineImage.native });

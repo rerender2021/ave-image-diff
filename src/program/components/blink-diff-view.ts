@@ -2,7 +2,7 @@ import { AlignType, App, Pager, ResourceSource, Window } from "ave-ui";
 import { ImageView, Component } from "../../components";
 import { assetBuffer } from "../../utils";
 
-export class BlinkView extends Component {
+export class BlinkDiffView extends Component {
 	private pager: Pager;
 	private timer: NodeJS.Timer;
 
@@ -32,6 +32,9 @@ export class BlinkView extends Component {
 		this.pager.SetContent(this.baselineImage.control);
 		this.pager.SetContentHorizontalAlign(AlignType.Center);
 		this.pager.SetContentVerticalAlign(AlignType.Center);
+
+		
+		this.update();
 	}
 
 	update() {
@@ -60,7 +63,6 @@ export class BlinkView extends Component {
 
 	show(): void {
 		this.pager.SetVisible(true);
-		this.update();
 		this.blink();
 	}
 
