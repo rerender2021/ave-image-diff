@@ -9,6 +9,7 @@ export function getAppLayout(window: Window) {
 			baseline: { x: 0, y: 0 },
 			current: { x: 1, y: 0 },
 			diff: { x: 1, y: 1 },
+			zoom: { x: 0, y: 1 },
 		},
 	};
 

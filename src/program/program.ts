@@ -5,6 +5,7 @@ import { assetBuffer } from "../utils";
 import * as pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
 import * as fs from "fs";
+import { ZoomView } from "../components/zoom-view";
 
 export class Program {
 	app: App;
@@ -18,6 +19,8 @@ export class Program {
 
 	diffPager: Pager;
 	diffImage: ImageView;
+
+	zoomView: ZoomView;
 
 	constructor() {
 		this.app = new App();
@@ -39,6 +42,9 @@ export class Program {
 
 	onCreateContent() {
 		this.window.OnCreateContent((window) => {
+			//
+			this.zoomView = new ZoomView(window);
+
 			//
 			this.baselineImage = new ImageView(window);
 
@@ -62,6 +68,11 @@ export class Program {
 			this.diffPager.SetContent(this.diffImage.control);
 			this.diffPager.SetContentHorizontalAlign(AlignType.Center);
 			this.diffPager.SetContentVerticalAlign(AlignType.Center);
+
+            this.diffImage.control.OnPointerMove((sender, mp) => {
+                const pos = mp.Position;
+		        this.zoomView.updatePixelPos(pos);
+            });
 
 			//
 			const container = this.onCreateLayout(window);
@@ -87,8 +98,12 @@ export class Program {
 		const diffPNG = new PNG({ width, height });
 		pixelmatch(baselinePNG.data, currentPNG.data, diffPNG.data, width, height, { threshold: 0, includeAA: true, alpha: 0 });
 		const diffBuffer = PNG.sync.write(diffPNG);
-        // fs.writeFileSync("diff.png", diffBuffer);
+		// fs.writeFileSync("diff.png", diffBuffer);
 		this.diffImage.updateRawImage(codec.Open(ResourceSource.FromBuffer(diffBuffer)));
+
+        //
+		this.zoomView.track({ image: this.currentImage.native });
+
 	}
 
 	onCreateLayout(window: Window) {
@@ -97,6 +112,7 @@ export class Program {
 		container.addControl(this.baselinePager, container.areas.baseline);
 		container.addControl(this.currentPager, container.areas.current);
 		container.addControl(this.diffPager, container.areas.diff);
+		container.addControl(this.zoomView.control, container.areas.zoom);
 
 		return container.control;
 	}
