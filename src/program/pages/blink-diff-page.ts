@@ -14,11 +14,15 @@ export class BlinkDiffPage extends Page {
 	currentImage: ImageView;
 	currentSource: ResourceSource;
 
+	diffPager: Pager;
+	diffImage: ImageView;
+
 	onCreate(): GridLayout {
 		const { window } = this;
 
 		//
 		this.baselineImage = new ImageView(window);
+		this.currentImage = new ImageView(window);
 
 		this.blinkPager = new Pager(window);
 		this.blinkPager.SetContent(this.baselineImage.control);
@@ -26,7 +30,12 @@ export class BlinkDiffPage extends Page {
 		this.blinkPager.SetContentVerticalAlign(AlignType.Center);
 
 		//
-		this.currentImage = new ImageView(window);
+		this.diffImage = new ImageView(window);
+
+		this.diffPager = new Pager(window);
+		this.diffPager.SetContent(this.diffImage.control);
+		this.diffPager.SetContentHorizontalAlign(AlignType.Center);
+		this.diffPager.SetContentVerticalAlign(AlignType.Center);
 
 		this.update();
 		this.blink();
@@ -51,11 +60,14 @@ export class BlinkDiffPage extends Page {
 		const container = new GridLayout<keyof typeof containerLayout.areas>(window, containerLayout);
 
 		container.addControl(this.blinkPager, container.areas.blink);
+		container.addControl(this.diffPager, container.areas.diff);
 
 		return container;
 	}
 
 	update() {
+		const { window } = this;
+
 		const codec = this.app.GetImageCodec();
 
 		const baselineBuffer = assetBuffer("map-baseline.png");
@@ -66,6 +78,16 @@ export class BlinkDiffPage extends Page {
 
 		this.currentSource = ResourceSource.FromBuffer(currentBuffer);
 		this.currentImage.updateRawImage(codec.Open(this.currentSource));
+
+		//
+		const baselinePNG = PNG.sync.read(baselineBuffer);
+		const currentPNG = PNG.sync.read(currentBuffer);
+		const { width, height } = baselinePNG;
+		const diffPNG = new PNG({ width, height });
+		pixelmatch(baselinePNG.data, currentPNG.data, diffPNG.data, width, height, { threshold: 0, includeAA: true, alpha: 0 });
+		const diffBuffer = PNG.sync.write(diffPNG);
+		// fs.writeFileSync("diff.png", diffBuffer);
+		this.diffImage.updateRawImage(codec.Open(ResourceSource.FromBuffer(diffBuffer)));
 	}
 
 	blink() {
