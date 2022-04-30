@@ -1,4 +1,4 @@
-import { AlignType, App, Pager, ResourceSource, Window } from "ave-ui";
+import { AlignType, App, AveImage, Pager, ResourceSource, Window } from "ave-ui";
 import { ImageView, Component } from "../../components";
 import { assetBuffer } from "../../utils";
 
@@ -6,12 +6,17 @@ export class BlinkDiffView extends Component {
 	private pager: Pager;
 	private timer: NodeJS.Timer;
 
-	private baselineImage: ImageView;
-	private currentImage: ImageView;
+	private baseline: AveImage;
+	private current: AveImage;
+	private view: ImageView;
 
 	private app: App;
 
 	get control() {
+		return this.view.control;
+	}
+
+	get contrainer() {
 		return this.pager;
 	}
 
@@ -25,15 +30,13 @@ export class BlinkDiffView extends Component {
 		const { window } = this;
 
 		//
-		this.baselineImage = new ImageView(window);
-		this.currentImage = new ImageView(window);
+		this.view = new ImageView(window);
 
 		this.pager = new Pager(window);
-		this.pager.SetContent(this.baselineImage.control);
+		this.pager.SetContent(this.view.control);
 		this.pager.SetContentHorizontalAlign(AlignType.Center);
 		this.pager.SetContentVerticalAlign(AlignType.Center);
 
-		
 		this.update();
 	}
 
@@ -43,21 +46,21 @@ export class BlinkDiffView extends Component {
 		const baselineBuffer = assetBuffer("map-baseline.png");
 		const currentBuffer = assetBuffer("map-current.png");
 
-		const baselineSource = ResourceSource.FromBuffer(baselineBuffer);
-		this.baselineImage.updateRawImage(codec.Open(baselineSource));
+		this.baseline = codec.Open(ResourceSource.FromBuffer(baselineBuffer));
+		this.current = codec.Open(ResourceSource.FromBuffer(currentBuffer));
 
-		const currentSource = ResourceSource.FromBuffer(currentBuffer);
-		this.currentImage.updateRawImage(codec.Open(currentSource));
+		this.view.updateRawImage(this.baseline);
 	}
 
 	blink() {
+		let displayBaseline = true;
 		this.timer = setInterval(() => {
-			const thisTurn = this.pager.GetContent();
-			if (thisTurn === this.baselineImage.control) {
-				this.pager.SetContent(this.currentImage.control);
-			} else if (thisTurn === this.currentImage.control) {
-				this.pager.SetContent(this.baselineImage.control);
+			if (displayBaseline) {
+				this.view.updateRawImage(this.baseline);
+			} else {
+				this.view.updateRawImage(this.current);
 			}
+			displayBaseline = !displayBaseline;
 		}, 500);
 	}
 
