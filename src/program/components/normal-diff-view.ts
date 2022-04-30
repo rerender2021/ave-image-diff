@@ -13,6 +13,10 @@ export class NormalDiffView extends Component {
 	private app: App;
 
 	get control() {
+		return this.view.control;
+	}
+
+	get container() {
 		return this.pager;
 	}
 

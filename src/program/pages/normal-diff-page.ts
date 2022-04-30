@@ -93,7 +93,7 @@ export class NormalDiffPage extends Page {
 
 		container.addControl(this.baselinePager, container.areas.baseline);
 		container.addControl(this.currentPager, container.areas.current);
-		container.addControl(this.normalDiffView.control, container.areas.diff);
+		container.addControl(this.normalDiffView.container, container.areas.diff);
 		container.addControl(this.blinkDiffView.control, container.areas.diff);
 
 		//
