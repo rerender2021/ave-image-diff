@@ -6,7 +6,7 @@ import { BlinkDiffView } from "../components/blink-diff-view";
 import { NormalDiffView } from "../components/normal-diff-view";
 import { state } from "../state";
 
-export class NormalDiffPage extends Page {
+export class DiffPage extends Page {
 	baselinePager: Pager;
 	baselineImage: ImageView;
 	baselineSource: ResourceSource;

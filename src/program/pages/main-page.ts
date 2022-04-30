@@ -1,7 +1,7 @@
 import { CheckBox, CheckValue, ScrollBar, TextBox } from "ave-ui";
 import { GridLayout, Page } from "../../components";
 import { state } from "../state";
-import { NormalDiffPage } from "./normal-diff-page";
+import { DiffPage } from "./diff-page";
 import * as debounce from "debounce";
 
 export class MainPage extends Page {
@@ -9,7 +9,7 @@ export class MainPage extends Page {
 	blendAlphaScroll: ScrollBar;
 	blendAlphaText: TextBox;
 
-	normalDiffPage: NormalDiffPage;
+	diffPage: DiffPage;
 
 	onCreate(): GridLayout {
 		const { window } = this;
@@ -37,7 +37,7 @@ export class MainPage extends Page {
 		this.blendAlphaText.SetText("Blend Alpha");
 
 		//
-		this.normalDiffPage = new NormalDiffPage(window, this.app);
+		this.diffPage = new DiffPage(window, this.app);
 
 		const container = this.onCreateLayout();
 		return container;
@@ -68,7 +68,7 @@ export class MainPage extends Page {
 		};
 		const controlGrid = new GridLayout<keyof typeof controlLayout.areas>(window, controlLayout);
 
-		container.addControl(this.normalDiffPage.control, container.areas.main);
+		container.addControl(this.diffPage.control, container.areas.main);
 		container.addControl(controlGrid.control, container.areas.control);
 
 		controlGrid.addControl(this.blinkCheckBox, controlGrid.areas.blink);
