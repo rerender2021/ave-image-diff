@@ -1,8 +1,7 @@
 import { CheckBox, CheckValue, ScrollBar, TextBox } from "ave-ui";
 import { GridLayout, Page } from "../../components";
 import { state } from "../state";
-import { BlinkDiffPage } from "./blink-diff-page";
-import { NormalDiffPage } from "./normal-diff-page";
+import { DiffPage } from "./diff-page";
 import * as debounce from "debounce";
 
 export class MainPage extends Page {
@@ -10,8 +9,7 @@ export class MainPage extends Page {
 	blendAlphaScroll: ScrollBar;
 	blendAlphaText: TextBox;
 
-	normalDiffPage: NormalDiffPage;
-	blinkDiffPage: BlinkDiffPage;
+	diffPage: DiffPage;
 
 	onCreate(): GridLayout {
 		const { window } = this;
@@ -22,7 +20,6 @@ export class MainPage extends Page {
 		this.blinkCheckBox.OnCheck((sender: CheckBox) => {
 			const checkValue = sender.GetValue();
 			state.setBlink(checkValue === CheckValue.Checked);
-			this.swichDiffPage();
 		});
 
 		//
@@ -40,9 +37,7 @@ export class MainPage extends Page {
 		this.blendAlphaText.SetText("Blend Alpha");
 
 		//
-		this.normalDiffPage = new NormalDiffPage(window, this.app);
-		this.blinkDiffPage = new BlinkDiffPage(window, this.app);
-		this.blinkDiffPage.hide();
+		this.diffPage = new DiffPage(window, this.app);
 
 		const container = this.onCreateLayout();
 		return container;
@@ -73,8 +68,7 @@ export class MainPage extends Page {
 		};
 		const controlGrid = new GridLayout<keyof typeof controlLayout.areas>(window, controlLayout);
 
-		container.addControl(this.normalDiffPage.control, container.areas.main);
-		container.addControl(this.blinkDiffPage.control, container.areas.main);
+		container.addControl(this.diffPage.control, container.areas.main);
 		container.addControl(controlGrid.control, container.areas.control);
 
 		controlGrid.addControl(this.blinkCheckBox, controlGrid.areas.blink);
@@ -82,15 +76,5 @@ export class MainPage extends Page {
 		controlGrid.addControl(this.blendAlphaScroll, controlGrid.areas.blendAlpha);
 
 		return container;
-	}
-
-	swichDiffPage() {
-		if (state.blink) {
-			this.normalDiffPage.hide();
-			this.blinkDiffPage.show();
-		} else {
-			this.normalDiffPage.show();
-			this.blinkDiffPage.hide();
-		}
 	}
 }

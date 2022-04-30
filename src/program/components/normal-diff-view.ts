@@ -5,20 +5,19 @@ import { PNG } from "pngjs";
 import { state } from "../state";
 import { autorun } from "mobx";
 
-export class DiffView extends Component {
+export class NormalDiffView extends Component {
 	private view: ImageView;
-	private _pager: Pager;
+	private pager: Pager;
 	private baseline: Buffer;
 	private current: Buffer;
-
-	app: App;
+	private app: App;
 
 	get control() {
 		return this.view.control;
 	}
 
-	get pager() {
-		return this._pager;
+	get container() {
+		return this.pager;
 	}
 
 	constructor(window: Window, app: App) {
@@ -31,11 +30,15 @@ export class DiffView extends Component {
 		const { window } = this;
 		this.view = new ImageView(window);
 
-		this._pager = new Pager(window);
-		this._pager.SetContent(this.view.control);
-		this._pager.SetContentHorizontalAlign(AlignType.Center);
-		this._pager.SetContentVerticalAlign(AlignType.Center);
+		this.pager = new Pager(window);
+		this.pager.SetContent(this.view.control);
+		this.pager.SetContentHorizontalAlign(AlignType.Center);
+		this.pager.SetContentVerticalAlign(AlignType.Center);
 
+		this.watch();
+	}
+
+	watch() {
 		autorun(() => {
 			this.update(this.baseline, this.current, state.blendAlpha);
 		});
@@ -61,5 +64,13 @@ export class DiffView extends Component {
 		// fs.writeFileSync("diff.png", diffBuffer);
 		const codec = this.app.GetImageCodec();
 		this.view.updateRawImage(codec.Open(ResourceSource.FromBuffer(diffBuffer)));
+	}
+
+	show(): void {
+		this.pager.SetVisible(true);
+	}
+
+	hide(): void {
+		this.pager.SetVisible(false);
 	}
 }

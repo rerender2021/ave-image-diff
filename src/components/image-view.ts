@@ -40,4 +40,8 @@ export class ImageView extends Component {
 		this.image = new NativeRawImage(this.window, aveImage);
 		this.view.SetImage(this.image.native);
 	}
+
+	redraw() {
+		this.view.Redraw();
+	}
 }

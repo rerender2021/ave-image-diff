@@ -1,9 +1,12 @@
 import { AlignType, Pager, ResourceSource, Vec2 } from "ave-ui";
+import { autorun } from "mobx";
 import { GridLayout, ImageView, Page, ZoomView } from "../../components";
 import { assetBuffer } from "../../utils";
-import { DiffView } from "../components/diff-view";
+import { BlinkDiffView } from "../components/blink-diff-view";
+import { NormalDiffView } from "../components/normal-diff-view";
+import { state } from "../state";
 
-export class NormalDiffPage extends Page {
+export class DiffPage extends Page {
 	baselinePager: Pager;
 	baselineImage: ImageView;
 	baselineSource: ResourceSource;
@@ -12,7 +15,8 @@ export class NormalDiffPage extends Page {
 	currentImage: ImageView;
 	currentSource: ResourceSource;
 
-	diffView: DiffView;
+	normalDiffView: NormalDiffView;
+	blinkDiffView: BlinkDiffView;
 
 	baselineZoomView: ZoomView;
 	currentZoomView: ZoomView;
@@ -41,9 +45,10 @@ export class NormalDiffPage extends Page {
 		this.currentPager.SetContentVerticalAlign(AlignType.Center);
 
 		//
-		this.diffView = new DiffView(window, this.app);
+		this.normalDiffView = new NormalDiffView(window, this.app);
+		this.blinkDiffView = new BlinkDiffView(window, this.app);
 
-		[this.diffView, this.baselineImage, this.currentImage].forEach((each) => {
+		[this.normalDiffView, this.blinkDiffView, this.baselineImage, this.currentImage].forEach((each) => {
 			each.control.OnPointerMove((sender, mp) => {
 				const pos = mp.Position;
 				this.onPointerMove(pos);
@@ -51,6 +56,7 @@ export class NormalDiffPage extends Page {
 		});
 
 		this.update();
+		this.watch();
 
 		//
 		const container = this.onCreateLayout();
@@ -67,8 +73,8 @@ export class NormalDiffPage extends Page {
 			areas: {
 				baseline: { x: 1, y: 1 },
 				current: { x: 3, y: 1 },
-				diff: { x: 3, y: 3 },
-				zoom: { x: 1, y: 3 },
+				diff: { x: 1, y: 3 },
+				zoom: { x: 3, y: 3 },
 				control: { x: 5, y: 1 },
 			},
 		};
@@ -87,7 +93,8 @@ export class NormalDiffPage extends Page {
 
 		container.addControl(this.baselinePager, container.areas.baseline);
 		container.addControl(this.currentPager, container.areas.current);
-		container.addControl(this.diffView.pager, container.areas.diff);
+		container.addControl(this.normalDiffView.container, container.areas.diff);
+		container.addControl(this.blinkDiffView.contrainer, container.areas.diff);
 
 		//
 		container.addControl(zoomGrid.control, container.areas.zoom);
@@ -95,6 +102,18 @@ export class NormalDiffPage extends Page {
 		zoomGrid.addControl(this.currentZoomView.control, zoomGrid.areas.current);
 
 		return container;
+	}
+
+	watch() {
+		autorun(() => {
+			if (state.blink) {
+				this.blinkDiffView.show();
+				this.normalDiffView.hide();
+			} else {
+				this.normalDiffView.show();
+				this.blinkDiffView.hide();
+			}
+		});
 	}
 
 	update() {
@@ -110,7 +129,7 @@ export class NormalDiffPage extends Page {
 		this.currentImage.updateRawImage(codec.Open(this.currentSource));
 
 		//
-		this.diffView.update(baselineBuffer, currentBuffer);
+		this.normalDiffView.update(baselineBuffer, currentBuffer);
 
 		//
 		this.baselineZoomView.track({ image: this.baselineImage.native });
