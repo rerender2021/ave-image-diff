@@ -1,8 +1,7 @@
 import { AlignType, Pager, ResourceSource, Vec2 } from "ave-ui";
 import { GridLayout, ImageView, Page, ZoomView } from "../../components";
 import { assetBuffer } from "../../utils";
-import * as pixelmatch from "pixelmatch";
-import { PNG } from "pngjs";
+import { DiffView } from "../components/diff-view";
 
 export class NormalDiffPage extends Page {
 	baselinePager: Pager;
@@ -13,8 +12,7 @@ export class NormalDiffPage extends Page {
 	currentImage: ImageView;
 	currentSource: ResourceSource;
 
-	diffPager: Pager;
-	diffImage: ImageView;
+	diffView: DiffView;
 
 	baselineZoomView: ZoomView;
 	currentZoomView: ZoomView;
@@ -43,14 +41,9 @@ export class NormalDiffPage extends Page {
 		this.currentPager.SetContentVerticalAlign(AlignType.Center);
 
 		//
-		this.diffImage = new ImageView(window);
+		this.diffView = new DiffView(window, this.app);
 
-		this.diffPager = new Pager(window);
-		this.diffPager.SetContent(this.diffImage.control);
-		this.diffPager.SetContentHorizontalAlign(AlignType.Center);
-		this.diffPager.SetContentVerticalAlign(AlignType.Center);
-
-		[this.diffImage, this.baselineImage, this.currentImage].forEach((each) => {
+		[this.diffView, this.baselineImage, this.currentImage].forEach((each) => {
 			each.control.OnPointerMove((sender, mp) => {
 				const pos = mp.Position;
 				this.onPointerMove(pos);
@@ -94,7 +87,7 @@ export class NormalDiffPage extends Page {
 
 		container.addControl(this.baselinePager, container.areas.baseline);
 		container.addControl(this.currentPager, container.areas.current);
-		container.addControl(this.diffPager, container.areas.diff);
+		container.addControl(this.diffView.pager, container.areas.diff);
 
 		//
 		container.addControl(zoomGrid.control, container.areas.zoom);
@@ -117,14 +110,7 @@ export class NormalDiffPage extends Page {
 		this.currentImage.updateRawImage(codec.Open(this.currentSource));
 
 		//
-		const baselinePNG = PNG.sync.read(baselineBuffer);
-		const currentPNG = PNG.sync.read(currentBuffer);
-		const { width, height } = baselinePNG;
-		const diffPNG = new PNG({ width, height });
-		pixelmatch(baselinePNG.data, currentPNG.data, diffPNG.data, width, height, { threshold: 0, includeAA: true, alpha: 0 });
-		const diffBuffer = PNG.sync.write(diffPNG);
-		// fs.writeFileSync("diff.png", diffBuffer);
-		this.diffImage.updateRawImage(codec.Open(ResourceSource.FromBuffer(diffBuffer)));
+		this.diffView.update(baselineBuffer, currentBuffer);
 
 		//
 		this.baselineZoomView.track({ image: this.baselineImage.native });

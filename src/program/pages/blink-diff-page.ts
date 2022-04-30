@@ -1,8 +1,7 @@
 import { AlignType, Pager, ResourceSource } from "ave-ui";
 import { GridLayout, ImageView, Page } from "../../components";
 import { assetBuffer } from "../../utils";
-import * as pixelmatch from "pixelmatch";
-import { PNG } from "pngjs";
+import { DiffView } from "../components/diff-view";
 
 export class BlinkDiffPage extends Page {
 	blinkPager: Pager;
@@ -14,8 +13,7 @@ export class BlinkDiffPage extends Page {
 	currentImage: ImageView;
 	currentSource: ResourceSource;
 
-	diffPager: Pager;
-	diffImage: ImageView;
+	diffView: DiffView;
 
 	onCreate(): GridLayout {
 		const { window } = this;
@@ -30,12 +28,7 @@ export class BlinkDiffPage extends Page {
 		this.blinkPager.SetContentVerticalAlign(AlignType.Center);
 
 		//
-		this.diffImage = new ImageView(window);
-
-		this.diffPager = new Pager(window);
-		this.diffPager.SetContent(this.diffImage.control);
-		this.diffPager.SetContentHorizontalAlign(AlignType.Center);
-		this.diffPager.SetContentVerticalAlign(AlignType.Center);
+		this.diffView = new DiffView(window, this.app);
 
 		this.update();
 		this.blink();
@@ -60,7 +53,7 @@ export class BlinkDiffPage extends Page {
 		const container = new GridLayout<keyof typeof containerLayout.areas>(window, containerLayout);
 
 		container.addControl(this.blinkPager, container.areas.blink);
-		container.addControl(this.diffPager, container.areas.diff);
+		container.addControl(this.diffView.pager, container.areas.diff);
 
 		return container;
 	}
@@ -77,15 +70,7 @@ export class BlinkDiffPage extends Page {
 		this.currentSource = ResourceSource.FromBuffer(currentBuffer);
 		this.currentImage.updateRawImage(codec.Open(this.currentSource));
 
-		//
-		const baselinePNG = PNG.sync.read(baselineBuffer);
-		const currentPNG = PNG.sync.read(currentBuffer);
-		const { width, height } = baselinePNG;
-		const diffPNG = new PNG({ width, height });
-		pixelmatch(baselinePNG.data, currentPNG.data, diffPNG.data, width, height, { threshold: 0, includeAA: true, alpha: 0 });
-		const diffBuffer = PNG.sync.write(diffPNG);
-		// fs.writeFileSync("diff.png", diffBuffer);
-		this.diffImage.updateRawImage(codec.Open(ResourceSource.FromBuffer(diffBuffer)));
+		this.diffView.update(baselineBuffer, currentBuffer);
 	}
 
 	blink() {
