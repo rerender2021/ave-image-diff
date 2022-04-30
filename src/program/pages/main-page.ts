@@ -1,10 +1,10 @@
 import { CheckBox, CheckValue } from "ave-ui";
 import { GridLayout, Page } from "../../components";
+import { state } from "../state";
 import { BlinkDiffPage } from "./blink-diff-page";
 import { NormalDiffPage } from "./normal-diff-page";
 
 export class MainPage extends Page {
-	private inBlinkMode: boolean;
 
 	blinkCheckBox: CheckBox;
 	normalDiffPage: NormalDiffPage;
@@ -18,7 +18,7 @@ export class MainPage extends Page {
 		this.blinkCheckBox.SetText("Blink");
 		this.blinkCheckBox.OnCheck((sender: CheckBox) => {
 			const checkValue = sender.GetValue();
-			this.inBlinkMode = checkValue === CheckValue.Checked;
+			state.blink = checkValue === CheckValue.Checked;
 			this.swichDiffPage();
 		});
 
@@ -64,7 +64,7 @@ export class MainPage extends Page {
 	}
 
 	swichDiffPage() {
-		if (this.inBlinkMode) {
+		if (state.blink) {
 			this.normalDiffPage.hide();
 			this.blinkDiffPage.show();
 		} else {
