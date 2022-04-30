@@ -76,7 +76,7 @@ export class NormalDiffPage extends Page {
 
 		const zoomLayout = {
 			rows: "1 192dpx 1",
-			columns: "1 192dpx 32dpx 192dpx 1",
+			columns: "1 192dpx 16dpx 192dpx 1",
 			areas: {
 				baseline: { x: 1, y: 1 },
 				current: { x: 3, y: 1 },
@@ -87,7 +87,7 @@ export class NormalDiffPage extends Page {
 
 		container.addControl(this.baselinePager, container.areas.baseline);
 		container.addControl(this.currentPager, container.areas.current);
-		container.addControl(this.diffView.pager, container.areas.diff);
+		container.addControl(this.diffView.grid, container.areas.diff);
 
 		//
 		container.addControl(zoomGrid.control, container.areas.zoom);
