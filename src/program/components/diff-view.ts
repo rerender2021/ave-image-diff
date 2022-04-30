@@ -1,13 +1,13 @@
-import { Component, GridLayout, ImageView } from "../../components";
-import { AlignType, App, Pager, ResourceSource, ScrollBar, Window } from "ave-ui";
+import { Component, ImageView } from "../../components";
+import { AlignType, App, Pager, ResourceSource, Window } from "ave-ui";
 import * as pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
-import * as debounce from "debounce";
+import { state } from "../state";
+import { autorun } from "mobx";
 
 export class DiffView extends Component {
 	private view: ImageView;
 	private _pager: Pager;
-	private currentAlpha: number;
 	private baseline: Buffer;
 	private current: Buffer;
 
@@ -35,9 +35,17 @@ export class DiffView extends Component {
 		this._pager.SetContent(this.view.control);
 		this._pager.SetContentHorizontalAlign(AlignType.Center);
 		this._pager.SetContentVerticalAlign(AlignType.Center);
+
+		autorun(() => {
+			this.update(this.baseline, this.current, state.blendAlpha);
+		});
 	}
 
-	update(baseline: Buffer, current: Buffer) {
+	update(baseline: Buffer, current: Buffer, blendAlpha = 0.5) {
+		if (!baseline || !current) {
+			return;
+		}
+
 		this.baseline = baseline;
 		this.current = current;
 
@@ -47,7 +55,7 @@ export class DiffView extends Component {
 		const { width, height } = baselinePNG;
 		const diffPNG = new PNG({ width, height });
 
-		pixelmatch(baselinePNG.data, currentPNG.data, diffPNG.data, width, height, { threshold: 0, includeAA: true, alpha: 0 });
+		pixelmatch(baselinePNG.data, currentPNG.data, diffPNG.data, width, height, { threshold: 0, includeAA: true, alpha: blendAlpha });
 		const diffBuffer = PNG.sync.write(diffPNG);
 
 		// fs.writeFileSync("diff.png", diffBuffer);
