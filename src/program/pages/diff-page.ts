@@ -48,7 +48,7 @@ export class DiffPage extends Page {
 		this.normalDiffView = new NormalDiffView(window, this.app);
 		this.blinkDiffView = new BlinkDiffView(window, this.app);
 
-		[this.normalDiffView, this.baselineImage, this.currentImage].forEach((each) => {
+		[this.normalDiffView, this.blinkDiffView, this.baselineImage, this.currentImage].forEach((each) => {
 			each.control.OnPointerMove((sender, mp) => {
 				const pos = mp.Position;
 				this.onPointerMove(pos);
