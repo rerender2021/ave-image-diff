@@ -1,4 +1,4 @@
-import { App, WindowCreation, Window, WindowFlag, Pager, AlignType, ResourceSource } from "ave-ui";
+import { App, WindowCreation, Window, WindowFlag, Pager, AlignType, ResourceSource, Vec2 } from "ave-ui";
 import { ImageView } from "../components";
 import { getAppLayout } from "./layout";
 import { assetBuffer } from "../utils";
@@ -20,7 +20,8 @@ export class Program {
 	diffPager: Pager;
 	diffImage: ImageView;
 
-	zoomView: ZoomView;
+	baselineZoomView: ZoomView;
+	currentZoomView: ZoomView;
 
 	constructor() {
 		this.app = new App();
@@ -43,7 +44,8 @@ export class Program {
 	onCreateContent() {
 		this.window.OnCreateContent((window) => {
 			//
-			this.zoomView = new ZoomView(window);
+			this.baselineZoomView = new ZoomView(window);
+			this.currentZoomView = new ZoomView(window);
 
 			//
 			this.baselineImage = new ImageView(window);
@@ -69,10 +71,12 @@ export class Program {
 			this.diffPager.SetContentHorizontalAlign(AlignType.Center);
 			this.diffPager.SetContentVerticalAlign(AlignType.Center);
 
-            this.diffImage.control.OnPointerMove((sender, mp) => {
-                const pos = mp.Position;
-		        this.zoomView.updatePixelPos(pos);
-            });
+			[this.diffImage, this.baselineImage, this.currentImage].forEach((each) => {
+				each.control.OnPointerMove((sender, mp) => {
+					const pos = mp.Position;
+					this.onPointerMove(pos);
+				});
+			});
 
 			//
 			const container = this.onCreateLayout(window);
@@ -80,6 +84,11 @@ export class Program {
 			this.update();
 			return true;
 		});
+	}
+
+	onPointerMove(pos: Vec2) {
+		this.baselineZoomView.updatePixelPos(pos);
+		this.currentZoomView.updatePixelPos(pos);
 	}
 
 	update() {
@@ -101,18 +110,22 @@ export class Program {
 		// fs.writeFileSync("diff.png", diffBuffer);
 		this.diffImage.updateRawImage(codec.Open(ResourceSource.FromBuffer(diffBuffer)));
 
-        //
-		this.zoomView.track({ image: this.currentImage.native });
-
+		//
+		this.baselineZoomView.track({ image: this.baselineImage.native });
+		this.currentZoomView.track({ image: this.currentImage.native });
 	}
 
 	onCreateLayout(window: Window) {
-		const { container } = getAppLayout(window);
+		const { container, zoomGrid } = getAppLayout(window);
 
 		container.addControl(this.baselinePager, container.areas.baseline);
 		container.addControl(this.currentPager, container.areas.current);
 		container.addControl(this.diffPager, container.areas.diff);
-		container.addControl(this.zoomView.control, container.areas.zoom);
+
+		//
+		container.addControl(zoomGrid.control, container.areas.zoom);
+		zoomGrid.addControl(this.baselineZoomView.control, zoomGrid.areas.baseline);
+		zoomGrid.addControl(this.currentZoomView.control, zoomGrid.areas.current);
 
 		return container.control;
 	}

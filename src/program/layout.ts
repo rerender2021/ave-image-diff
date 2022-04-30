@@ -13,7 +13,17 @@ export function getAppLayout(window: Window) {
 		},
 	};
 
+	const zoomLayout = {
+		rows: "1 192dpx 1",
+		columns: "1 192dpx 32dpx 192dpx 1",
+		areas: {
+			baseline: { x: 1, y: 1 },
+			current: { x: 3, y: 1 },
+		},
+	};
+
 	return {
 		container: new GridLayout<keyof typeof containerLayout.areas>(window, containerLayout),
+		zoomGrid: new GridLayout<keyof typeof zoomLayout.areas>(window, zoomLayout),
 	};
 }
