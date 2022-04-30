@@ -13,9 +13,11 @@ export class Program {
 
 	baselinePager: Pager;
 	baselineImage: ImageView;
+	baselineSource: ResourceSource;
 
 	currentPager: Pager;
 	currentImage: ImageView;
+	currentSource: ResourceSource;
 
 	diffPager: Pager;
 	diffImage: ImageView;
@@ -84,7 +86,7 @@ export class Program {
 			});
 
 			//
-			const container = this.onCreateLayout(window);
+			const container = this.onCreateLayout();
 			window.SetContent(container);
 			this.update();
 			return true;
@@ -102,8 +104,11 @@ export class Program {
 		const baselineBuffer = assetBuffer("map-baseline.png");
 		const currentBuffer = assetBuffer("map-current.png");
 
-		this.baselineImage.updateRawImage(codec.Open(ResourceSource.FromBuffer(baselineBuffer)));
-		this.currentImage.updateRawImage(codec.Open(ResourceSource.FromBuffer(currentBuffer)));
+		this.baselineSource = ResourceSource.FromBuffer(baselineBuffer);
+		this.baselineImage.updateRawImage(codec.Open(this.baselineSource));
+
+		this.currentSource = ResourceSource.FromBuffer(currentBuffer);
+		this.currentImage.updateRawImage(codec.Open(this.currentSource));
 
 		//
 		const baselinePNG = PNG.sync.read(baselineBuffer);
@@ -120,7 +125,8 @@ export class Program {
 		this.currentZoomView.track({ image: this.currentImage.native });
 	}
 
-	onCreateLayout(window: Window) {
+	onCreateLayout() {
+		const { window } = this;
 		const { container, zoomGrid, controlGrid } = getAppLayout(window);
 
 		container.addControl(this.baselinePager, container.areas.baseline);
@@ -139,11 +145,18 @@ export class Program {
 			const checkValue = sender.GetValue();
 			this.inBlinkMode = checkValue === CheckValue.Checked;
 			console.log(`in blink mode: ${this.inBlinkMode}`);
+			this.switchDisplayMode(this.inBlinkMode);
 		});
 
 		container.addControl(controlGrid.control, container.areas.control);
 		controlGrid.addControl(blinkCheckBox, controlGrid.areas.blink);
 
 		return container.control;
+	}
+
+	switchDisplayMode(blink: Boolean) {
+		if (blink) {
+		} else {
+		}
 	}
 }
