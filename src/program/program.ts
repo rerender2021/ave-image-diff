@@ -1,4 +1,4 @@
-import { App, WindowCreation, Window, WindowFlag, Pager, AlignType, ResourceSource, Vec2 } from "ave-ui";
+import { App, WindowCreation, Window, WindowFlag, Pager, AlignType, ResourceSource, Vec2, CheckBox, CheckValue } from "ave-ui";
 import { ImageView } from "../components";
 import { getAppLayout } from "./layout";
 import { assetBuffer } from "../utils";
@@ -23,6 +23,8 @@ export class Program {
 	baselineZoomView: ZoomView;
 	currentZoomView: ZoomView;
 
+	inBlinkMode: boolean;
+
 	constructor() {
 		this.app = new App();
 
@@ -43,6 +45,9 @@ export class Program {
 
 	onCreateContent() {
 		this.window.OnCreateContent((window) => {
+			//
+			this.inBlinkMode = false;
+
 			//
 			this.baselineZoomView = new ZoomView(window);
 			this.currentZoomView = new ZoomView(window);
@@ -116,7 +121,7 @@ export class Program {
 	}
 
 	onCreateLayout(window: Window) {
-		const { container, zoomGrid } = getAppLayout(window);
+		const { container, zoomGrid, controlGrid } = getAppLayout(window);
 
 		container.addControl(this.baselinePager, container.areas.baseline);
 		container.addControl(this.currentPager, container.areas.current);
@@ -126,6 +131,18 @@ export class Program {
 		container.addControl(zoomGrid.control, container.areas.zoom);
 		zoomGrid.addControl(this.baselineZoomView.control, zoomGrid.areas.baseline);
 		zoomGrid.addControl(this.currentZoomView.control, zoomGrid.areas.current);
+
+		//
+		const blinkCheckBox = new CheckBox(window);
+		blinkCheckBox.SetText("Blink");
+		blinkCheckBox.OnCheck((sender: CheckBox) => {
+			const checkValue = sender.GetValue();
+			this.inBlinkMode = checkValue === CheckValue.Checked;
+			console.log(`in blink mode: ${this.inBlinkMode}`);
+		});
+
+		container.addControl(controlGrid.control, container.areas.control);
+		controlGrid.addControl(blinkCheckBox, controlGrid.areas.blink);
 
 		return container.control;
 	}
