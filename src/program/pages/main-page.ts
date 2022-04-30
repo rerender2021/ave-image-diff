@@ -1,12 +1,14 @@
 import { CheckBox, CheckValue } from "ave-ui";
 import { GridLayout, Page } from "../../components";
+import { BlinkDiffPage } from "./blink-diff-page";
 import { NormalDiffPage } from "./normal-diff-page";
 
 export class MainPage extends Page {
 	private inBlinkMode: boolean;
 
-	normalDiffPage: NormalDiffPage;
 	blinkCheckBox: CheckBox;
+	normalDiffPage: NormalDiffPage;
+	blinkDiffPage: BlinkDiffPage;
 
 	onCreate(): GridLayout {
 		const { window } = this;
@@ -22,6 +24,8 @@ export class MainPage extends Page {
 
 		//
 		this.normalDiffPage = new NormalDiffPage(window, this.app);
+		this.blinkDiffPage = new BlinkDiffPage(window, this.app);
+
 		const container = this.onCreateLayout();
 		return container;
 	}
@@ -49,7 +53,7 @@ export class MainPage extends Page {
 		};
 		const controlGrid = new GridLayout<keyof typeof controlLayout.areas>(window, controlLayout);
 
-		container.addControl(this.normalDiffPage.control, container.areas.main);
+		container.addControl(this.blinkDiffPage.control, container.areas.main);
 		container.addControl(controlGrid.control, container.areas.control);
 
 		controlGrid.addControl(this.blinkCheckBox, controlGrid.areas.blink);
