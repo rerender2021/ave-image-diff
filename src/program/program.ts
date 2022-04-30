@@ -6,10 +6,13 @@ import * as pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
 import * as fs from "fs";
 import { ZoomView } from "../components/zoom-view";
+import { MainPage } from "./pages/main-page";
 
 export class Program {
 	app: App;
 	window: Window;
+
+	mainPage: MainPage;
 
 	baselinePager: Pager;
 	baselineImage: ImageView;
@@ -86,8 +89,8 @@ export class Program {
 			});
 
 			//
-			const container = this.onCreateLayout();
-			window.SetContent(container);
+			this.mainPage = new MainPage(window);
+			window.SetContent(this.mainPage.control);
 			this.update();
 			return true;
 		});
