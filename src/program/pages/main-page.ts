@@ -9,6 +9,9 @@ export class MainPage extends Page {
 	blendAlphaScroll: ScrollBar;
 	blendAlphaText: TextBox;
 
+	zoomScroll: ScrollBar;
+	zoomText: TextBox;
+
 	diffPage: DiffPage;
 
 	onCreate(): GridLayout {
@@ -37,6 +40,20 @@ export class MainPage extends Page {
 		this.blendAlphaText.SetText("Blend Alpha");
 
 		//
+		this.zoomScroll = new ScrollBar(window);
+		this.zoomScroll.SetMinimum(1).SetMaximum(10).SetValue(1).SetShrink(false);
+		this.zoomScroll.OnScrolling(
+			debounce((sender: ScrollBar) => {
+				state.setZoom(sender.GetValue());
+			}, 300)
+		);
+
+		this.zoomText = new TextBox(window);
+		this.zoomText.SetReadOnly(true);
+		this.zoomText.SetBorder(false);
+		this.zoomText.SetText("Zoom");
+
+		//
 		this.diffPage = new DiffPage(window, this.app);
 
 		const container = this.onCreateLayout();
@@ -58,12 +75,14 @@ export class MainPage extends Page {
 		const container = new GridLayout<keyof typeof containerLayout.areas>(window, containerLayout);
 
 		const controlLayout = {
-			rows: "32dpx 32dpx 4dpx 16dpx 4dpx 1",
+			rows: "32dpx 16dpx 16dpx 16dpx 16dpx 16dpx 1",
 			columns: "1 1",
 			areas: {
 				blink: { x: 0, y: 1 },
-				blendAlpha: { x: 1, y: 3 },
 				blendAlphaText: { x: 0, y: 3 },
+				blendAlpha: { x: 1, y: 3 },
+				zoomText: { x: 0, y: 5 },
+				zoom: { x: 1, y: 5 },
 			},
 		};
 		const controlGrid = new GridLayout<keyof typeof controlLayout.areas>(window, controlLayout);
@@ -72,8 +91,12 @@ export class MainPage extends Page {
 		container.addControl(controlGrid.control, container.areas.control);
 
 		controlGrid.addControl(this.blinkCheckBox, controlGrid.areas.blink);
+
 		controlGrid.addControl(this.blendAlphaText, controlGrid.areas.blendAlphaText);
 		controlGrid.addControl(this.blendAlphaScroll, controlGrid.areas.blendAlpha);
+
+		controlGrid.addControl(this.zoomText, controlGrid.areas.zoomText);
+		controlGrid.addControl(this.zoomScroll, controlGrid.areas.zoom);
 
 		return container;
 	}
