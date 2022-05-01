@@ -165,12 +165,21 @@ export class DiffPage extends Page {
 			const baselineSource = ResourceSource.FromBuffer(buffer);
 			this.baselineImage.updateRawImage(codec.Open(baselineSource));
 			this.baselineImage.redraw();
+
+			this.baselinePager.SetContentSize(new Vec2(resizedBaseline.width, resizedBaseline.height));
 			this.baselinePager.Redraw();
+
+			[this.baselineImage].forEach((each) => {
+				each.control.OnPointerMove((sender, mp) => {
+					const pos = mp.Position;
+					this.onPointerMove(pos);
+				});
+			});
+
 			// this.baselinePager.SetContent(this.baselineImage.control);
 			// this.baselinePager.SetContentHorizontalAlign(AlignType.Center);
 			// this.baselinePager.SetContentVerticalAlign(AlignType.Center);
-
-			resizedBaseline.pack().pipe(fs.createWriteStream("out.png"));
+			// resizedBaseline.pack().pipe(fs.createWriteStream("out.png"));
 		});
 
 		this.baselineSource = ResourceSource.FromBuffer(baselineBuffer);
@@ -188,7 +197,8 @@ export class DiffPage extends Page {
 	}
 
 	onPointerMove(pos: Vec2) {
-		this.baselineZoomView.updatePixelPos(pos);
-		this.currentZoomView.updatePixelPos(pos);
+		const posZoom = new Vec2(Math.floor(pos.x) / state.zoom, Math.floor(pos.y) / state.zoom);
+		this.baselineZoomView.updatePixelPos(posZoom);
+		this.currentZoomView.updatePixelPos(posZoom);
 	}
 }

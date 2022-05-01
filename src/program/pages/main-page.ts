@@ -41,7 +41,7 @@ export class MainPage extends Page {
 
 		//
 		this.zoomScroll = new ScrollBar(window);
-		this.zoomScroll.SetMinimum(1).SetMaximum(10).SetValue(1).SetShrink(false);
+		this.zoomScroll.SetMinimum(1).SetMaximum(5).SetValue(1).SetShrink(false);
 		this.zoomScroll.OnScrolling(
 			debounce((sender: ScrollBar) => {
 				state.setZoom(sender.GetValue());
