@@ -7,6 +7,7 @@ import { NormalDiffView } from "../components/normal-diff-view";
 import { state } from "../state";
 import { PNG } from "pngjs";
 import * as fs from "fs";
+import { PixelateView } from "../../components/pixelate-view";
 
 export class DiffPage extends Page {
 	baselinePager: Pager;
@@ -22,6 +23,7 @@ export class DiffPage extends Page {
 
 	baselineZoomView: ZoomView;
 	currentZoomView: ZoomView;
+	pixelateView: PixelateView;
 
 	onCreate(): GridLayout {
 		const { window } = this;
@@ -49,6 +51,7 @@ export class DiffPage extends Page {
 		//
 		this.normalDiffView = new NormalDiffView(window, this.app);
 		this.blinkDiffView = new BlinkDiffView(window, this.app);
+		this.pixelateView = new PixelateView(window);
 
 		[this.normalDiffView, this.blinkDiffView, this.baselineImage, this.currentImage].forEach((each) => {
 			each.control.OnPointerMove((sender, mp) => {
@@ -97,6 +100,7 @@ export class DiffPage extends Page {
 		container.addControl(this.currentPager, container.areas.current);
 		container.addControl(this.normalDiffView.container, container.areas.diff);
 		container.addControl(this.blinkDiffView.contrainer, container.areas.diff);
+		container.addControl(this.pixelateView.control, container.areas.diff);
 
 		//
 		container.addControl(zoomGrid.control, container.areas.zoom);
@@ -121,27 +125,27 @@ export class DiffPage extends Page {
 	update() {
 		const codec = this.app.GetImageCodec();
 
-		let baselineBuffer = assetBuffer("map-baseline.png");
+		let baselineBuffer = assetBuffer("out.png");
 		const currentBuffer = assetBuffer("map-current.png");
 
-		const baselinePNG = PNG.sync.read(baselineBuffer);
-		const pixelSize = 5;
-		const resizedBaseline = new PNG({ width: baselinePNG.width * pixelSize, height: baselinePNG.height * pixelSize });
-		for (let y = 0; y < resizedBaseline.height; ++y) {
-			for (let x = 0; x < resizedBaseline.width; ++x) {
-				const i = (resizedBaseline.width * y + x) * 4;
-				const j = (baselinePNG.width * Math.floor((y) / pixelSize) + Math.floor((x) / pixelSize)) * 4;
+		// const baselinePNG = PNG.sync.read(baselineBuffer);
+		// const pixelSize = 10;
+		// const resizedBaseline = new PNG({ width: baselinePNG.width * pixelSize, height: baselinePNG.height * pixelSize });
+		// for (let y = 0; y < resizedBaseline.height; ++y) {
+		// 	for (let x = 0; x < resizedBaseline.width; ++x) {
+		// 		const i = (resizedBaseline.width * y + x) * 4;
+		// 		const j = (baselinePNG.width * Math.floor((y) / pixelSize) + Math.floor((x) / pixelSize)) * 4;
 
-				resizedBaseline.data[i] = baselinePNG.data[j];
-				resizedBaseline.data[i + 1] = baselinePNG.data[j + 1];
-				resizedBaseline.data[i + 2] = baselinePNG.data[j + 2];
-				resizedBaseline.data[i + 3] = baselinePNG.data[j + 3];
-			}
-		}
+		// 		resizedBaseline.data[i] = baselinePNG.data[j];
+		// 		resizedBaseline.data[i + 1] = baselinePNG.data[j + 1];
+		// 		resizedBaseline.data[i + 2] = baselinePNG.data[j + 2];
+		// 		resizedBaseline.data[i + 3] = baselinePNG.data[j + 3];
+		// 	}
+		// }
 
-		resizedBaseline.pack().pipe(fs.createWriteStream("out.png"));
+		// resizedBaseline.pack().pipe(fs.createWriteStream("out.png"));
 
-		baselineBuffer = PNG.sync.write(resizedBaseline);
+		// baselineBuffer = PNG.sync.write(resizedBaseline);
 
 		this.baselineSource = ResourceSource.FromBuffer(baselineBuffer);
 		this.baselineImage.updateRawImage(codec.Open(this.baselineSource));
@@ -155,6 +159,7 @@ export class DiffPage extends Page {
 		//
 		this.baselineZoomView.track({ image: this.baselineImage.native });
 		this.currentZoomView.track({ image: this.currentImage.native });
+		this.pixelateView.track({ image: this.baselineImage.native });
 	}
 
 	onPointerMove(pos: Vec2) {
