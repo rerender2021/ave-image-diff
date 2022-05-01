@@ -1,5 +1,5 @@
 import { CheckBox, CheckValue, ScrollBar, TextBox } from "ave-ui";
-import { GridLayout, Page } from "../../components";
+import { GridLayout, MiniView, Page } from "../../components";
 import { state } from "../state";
 import { DiffPage } from "./diff-page";
 import * as debounce from "debounce";
@@ -11,6 +11,8 @@ export class MainPage extends Page {
 
 	zoomScroll: ScrollBar;
 	zoomText: TextBox;
+
+	miniView: MiniView;
 
 	diffPage: DiffPage;
 
@@ -54,7 +56,11 @@ export class MainPage extends Page {
 		this.zoomText.SetText("Zoom");
 
 		//
+		this.miniView = new MiniView(window);
+
+		//
 		this.diffPage = new DiffPage(window, this.app);
+		this.miniView.track({ pager: [this.diffPage.baselinePager, this.diffPage.currentPager], image: this.diffPage.baselineImage.native });
 
 		const container = this.onCreateLayout();
 		return container;
@@ -66,7 +72,7 @@ export class MainPage extends Page {
 		//
 		const containerLayout = {
 			rows: "1",
-			columns: "1 192dpx",
+			columns: "1 192dpx 32dpx",
 			areas: {
 				main: { x: 0, y: 0 },
 				control: { x: 1, y: 0 },
@@ -75,14 +81,15 @@ export class MainPage extends Page {
 		const container = new GridLayout<keyof typeof containerLayout.areas>(window, containerLayout);
 
 		const controlLayout = {
-			rows: "32dpx 16dpx 16dpx 16dpx 16dpx 16dpx 1",
+			rows: "32dpx 128px 32dpx 16dpx 16dpx 16dpx 16dpx 16dpx 1",
 			columns: "1 1",
 			areas: {
-				blink: { x: 0, y: 1 },
-				blendAlphaText: { x: 0, y: 3 },
-				blendAlpha: { x: 1, y: 3 },
-				zoomText: { x: 0, y: 5 },
-				zoom: { x: 1, y: 5 },
+				miniView: { x: 0, y: 1, xspan: 2, yspan: 1 },
+				blink: { x: 0, y: 3 },
+				blendAlphaText: { x: 0, y: 5 },
+				blendAlpha: { x: 1, y: 5 },
+				zoomText: { x: 0, y: 7 },
+				zoom: { x: 1, y: 7 },
 			},
 		};
 		const controlGrid = new GridLayout<keyof typeof controlLayout.areas>(window, controlLayout);
@@ -97,6 +104,8 @@ export class MainPage extends Page {
 
 		controlGrid.addControl(this.zoomText, controlGrid.areas.zoomText);
 		controlGrid.addControl(this.zoomScroll, controlGrid.areas.zoom);
+
+		controlGrid.addControl(this.miniView.control, controlGrid.areas.miniView);
 
 		return container;
 	}

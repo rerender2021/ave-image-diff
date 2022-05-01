@@ -126,25 +126,6 @@ export class DiffPage extends Page {
 		let baselineBuffer = assetBuffer("map-baseline.png");
 		const currentBuffer = assetBuffer("map-current.png");
 
-		// const baselinePNG = PNG.sync.read(baselineBuffer);
-		// const pixelSize = 10;
-		// const resizedBaseline = new PNG({ width: baselinePNG.width * pixelSize, height: baselinePNG.height * pixelSize });
-		// for (let y = 0; y < resizedBaseline.height; ++y) {
-		// 	for (let x = 0; x < resizedBaseline.width; ++x) {
-		// 		const i = (resizedBaseline.width * y + x) * 4;
-		// 		const j = (baselinePNG.width * Math.floor((y) / pixelSize) + Math.floor((x) / pixelSize)) * 4;
-
-		// 		resizedBaseline.data[i] = baselinePNG.data[j];
-		// 		resizedBaseline.data[i + 1] = baselinePNG.data[j + 1];
-		// 		resizedBaseline.data[i + 2] = baselinePNG.data[j + 2];
-		// 		resizedBaseline.data[i + 3] = baselinePNG.data[j + 3];
-		// 	}
-		// }
-
-		// resizedBaseline.pack().pipe(fs.createWriteStream("out.png"));
-
-		// baselineBuffer = PNG.sync.write(resizedBaseline);
-
 		autorun(() => {
 			const baselinePNG = PNG.sync.read(baselineBuffer);
 			const pixelSize = state.zoom;
