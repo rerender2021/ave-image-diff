@@ -52,8 +52,12 @@ export class NormalDiffView extends Component {
 		this.baseline = baseline;
 		this.current = current;
 
-		const baselinePNG = PNG.sync.read(baseline);
-		const currentPNG = PNG.sync.read(current);
+		const baselinePNG = PNG.sync.read(this.baseline);
+		const currentPNG = PNG.sync.read(this.current);
+
+		if (baselinePNG.width !== currentPNG.width || baselinePNG.height !== currentPNG.height) {
+			return;
+		}
 
 		const { width, height } = baselinePNG;
 		const diffPNG = new PNG({ width, height });
