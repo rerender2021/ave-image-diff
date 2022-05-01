@@ -60,7 +60,10 @@ export class MainPage extends Page {
 
 		//
 		this.diffPage = new DiffPage(window, this.app);
-		this.miniView.track({ pager: [this.diffPage.baselinePager, this.diffPage.currentPager], image: this.diffPage.baselineImage.native });
+		this.miniView.track({
+			pager: [this.diffPage.baselinePager, this.diffPage.currentPager, this.diffPage.normalDiffView.container],
+			image: this.diffPage.baselineImage.native,
+		});
 
 		const container = this.onCreateLayout();
 		return container;

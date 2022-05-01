@@ -127,8 +127,10 @@ export class DiffPage extends Page {
 		const currentBuffer = assetBuffer("map-current.png");
 
 		autorun(() => {
-			const baselinePNG = PNG.sync.read(baselineBuffer);
 			const pixelSize = state.zoom;
+
+			//
+			const baselinePNG = PNG.sync.read(baselineBuffer);
 			const resizedBaseline = new PNG({ width: baselinePNG.width * pixelSize, height: baselinePNG.height * pixelSize });
 			for (let y = 0; y < resizedBaseline.height; ++y) {
 				for (let x = 0; x < resizedBaseline.width; ++x) {
@@ -142,24 +144,47 @@ export class DiffPage extends Page {
 				}
 			}
 
-			const buffer = PNG.sync.write(resizedBaseline);
-			const baselineSource = ResourceSource.FromBuffer(buffer);
+			const resizedBaselineBuffer = PNG.sync.write(resizedBaseline);
+			const baselineSource = ResourceSource.FromBuffer(resizedBaselineBuffer);
 			this.baselineImage.updateRawImage(codec.Open(baselineSource));
 			this.baselineImage.redraw();
 
 			this.baselinePager.SetContentSize(new Vec2(resizedBaseline.width, resizedBaseline.height));
 			this.baselinePager.Redraw();
 
-			[this.baselineImage].forEach((each) => {
+			//
+			const currentPNG = PNG.sync.read(currentBuffer);
+			const resizedCurrent = new PNG({ width: currentPNG.width * pixelSize, height: currentPNG.height * pixelSize });
+			for (let y = 0; y < resizedCurrent.height; ++y) {
+				for (let x = 0; x < resizedCurrent.width; ++x) {
+					const i = (resizedCurrent.width * y + x) * 4;
+					const j = (currentPNG.width * Math.floor(y / pixelSize) + Math.floor(x / pixelSize)) * 4;
+
+					resizedCurrent.data[i] = currentPNG.data[j];
+					resizedCurrent.data[i + 1] = currentPNG.data[j + 1];
+					resizedCurrent.data[i + 2] = currentPNG.data[j + 2];
+					resizedCurrent.data[i + 3] = currentPNG.data[j + 3];
+				}
+			}
+
+			const resizedCurrentBuffer = PNG.sync.write(resizedCurrent);
+			const currentSource = ResourceSource.FromBuffer(resizedCurrentBuffer);
+			this.currentImage.updateRawImage(codec.Open(currentSource));
+			this.currentImage.redraw();
+
+			this.currentPager.SetContentSize(new Vec2(resizedCurrent.width, resizedCurrent.height));
+			this.currentPager.Redraw();
+
+			[this.normalDiffView, this.baselineImage, this.currentImage].forEach((each) => {
 				each.control.OnPointerMove((sender, mp) => {
 					const pos = mp.Position;
-					this.onPointerMove(pos);
+					const posZoom = new Vec2(Math.floor(pos.x) / state.zoom, Math.floor(pos.y) / state.zoom);
+					this.onPointerMove(posZoom);
 				});
 			});
 
-			// this.baselinePager.SetContent(this.baselineImage.control);
-			// this.baselinePager.SetContentHorizontalAlign(AlignType.Center);
-			// this.baselinePager.SetContentVerticalAlign(AlignType.Center);
+			this.normalDiffView.update(resizedBaselineBuffer, resizedCurrentBuffer);
+
 			// resizedBaseline.pack().pipe(fs.createWriteStream("out.png"));
 		});
 
@@ -178,8 +203,7 @@ export class DiffPage extends Page {
 	}
 
 	onPointerMove(pos: Vec2) {
-		const posZoom = new Vec2(Math.floor(pos.x) / state.zoom, Math.floor(pos.y) / state.zoom);
-		this.baselineZoomView.updatePixelPos(posZoom);
-		this.currentZoomView.updatePixelPos(posZoom);
+		this.baselineZoomView.updatePixelPos(pos);
+		this.currentZoomView.updatePixelPos(pos);
 	}
 }

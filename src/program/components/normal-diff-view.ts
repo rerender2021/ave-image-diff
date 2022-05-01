@@ -1,5 +1,5 @@
 import { Component, ImageView } from "../../components";
-import { AlignType, App, Pager, ResourceSource, Window } from "ave-ui";
+import { AlignType, App, Pager, ResourceSource, Vec2, Window } from "ave-ui";
 import * as pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
 import { state } from "../state";
@@ -68,6 +68,7 @@ export class NormalDiffView extends Component {
 		// fs.writeFileSync("diff.png", diffBuffer);
 		const codec = this.app.GetImageCodec();
 		this.view.updateRawImage(codec.Open(ResourceSource.FromBuffer(diffBuffer)));
+		this.pager.SetContentSize(new Vec2(width, height));
 	}
 
 	show(): void {
