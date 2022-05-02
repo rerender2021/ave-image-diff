@@ -45,15 +45,21 @@ export class MainPage extends Page {
 		}
 
 		[this.thresholdScroll, this.thresholdText] = createSlider(0, 100, 0, "Threshold",
-			debounce((sender: TrackBar) => {
+			(sender: TrackBar) => {
 				state.setThreshold(sender.GetValue() / 100);
-			}, 300)
+			}
+			// debounce((sender: TrackBar) => {
+			// 	state.setThreshold(sender.GetValue() / 100);
+			// }, 300)
 		);
 
 		[this.blendAlphaScroll, this.blendAlphaText] = createSlider(0, 100, 50, "Blend Alpha",
-			debounce((sender: TrackBar) => {
+			(sender: TrackBar) => {
 				state.setBlendAlpha(sender.GetValue() / 100);
-			}, 300)
+			}
+			// debounce((sender: TrackBar) => {
+			// 	state.setBlendAlpha(sender.GetValue() / 100);
+			// }, 300)
 		);
 
 		[this.zoomScroll, this.zoomText] = createSlider(1, 16, 1, "Zoom",

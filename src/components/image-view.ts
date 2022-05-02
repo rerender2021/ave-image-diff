@@ -1,4 +1,4 @@
-import { AveImage, DrawImageFilter, Picture, StretchMode, Window } from "ave-ui";
+import { AveImage, DrawImageFilter, Picture, StretchMode, Window, ImageData, ImageBox } from "ave-ui";
 import { Component } from "./component";
 import { INativeImage, NativeRawImage } from "./native-image";
 
@@ -44,6 +44,22 @@ export class ImageView extends Component {
 	updateRawImage(aveImage: AveImage) {
 		this.image = new NativeRawImage(this.window, aveImage);
 		this.view.SetImage(this.image.native);
+	}
+
+	updateRawData(data: ImageData) {
+		if (this.image) {
+			const md = this.image.data.GetMetadata(0);
+			if (md.Format != data.Format || md.Width != data.Width || md.Height != data.Height)
+				this.image = null;
+		}
+		if(!this.image){
+			const img = new AveImage();
+			img.Create2D(data.Format, data.Width, data.Height, 1, 1);
+			img.CopyFrom(0, 0, 0, 0, data, ImageBox.Full(), 0);
+			this.updateRawImage(img);
+		} else {
+			this.image.updateData(data);
+		}
 	}
 
 	redraw() {

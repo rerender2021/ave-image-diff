@@ -1,5 +1,5 @@
 import { Component, ImageView } from "../../components";
-import { AlignType, App, AveImage, Pager, PixFormat, ResourceSource, Vec2, Window, ImageData, ImageBox } from "ave-ui";
+import { AlignType, App, AveImage, Pager, PixFormat, ResourceSource, Vec2, Window, ImageData, ImageBox, AveLib } from "ave-ui";
 import * as pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
 import { state } from "../state";
@@ -8,8 +8,11 @@ import { autorun } from "mobx";
 export class NormalDiffView extends Component {
 	private view: ImageView;
 	private pager: Pager;
-	private baseline: AveImage;	
+	private baseline: AveImage;
 	private current: AveImage;
+	private baselineData: ImageData;
+	private currentData: ImageData;
+	private diffData: ImageData;
 	//private baseline: Buffer;
 	//private current: Buffer;
 	private app: App;
@@ -46,55 +49,64 @@ export class NormalDiffView extends Component {
 		});
 	}
 
-	update(baseline: AveImage, current: AveImage, threshold = 0, blendAlpha = 0.5) {
+	private getImageData(img: AveImage) {
+		const data = img.GetImage(0, 0, 0);
+		if (data.RowPitch != data.Width * 4 || PixFormat.R8G8B8A8_UNORM != data.Format) {
+			const dn = new ImageData();
+			dn.Width = data.Width;
+			dn.Height = data.Height;
+			dn.Depth = data.Depth;
+			dn.Format = PixFormat.R8G8B8A8_UNORM;
+			dn.RowPitch = dn.Width * 4; // Each row exactly 4 * width bytes without padding
+			dn.SlicePitch = dn.RowPitch * dn.Height;
+			dn.Data = new ArrayBuffer(dn.SlicePitch * dn.Depth);
+			img.CopyTo(dn, 0, 0, 0, 0, null, 0);
+			return dn;
+		}
+		return data;
+	}
+
+	update(baseline: AveImage, current: AveImage, fThreshold = 0, blendAlpha = 0.5) {
 		if (!baseline || !current) {
 			return;
 		}
 
-		this.baseline = baseline;
-		this.current = current;
+		if (this.baseline != baseline) {
+			this.baseline = baseline;
+			console.time("GetImage");
+			this.baselineData = this.getImageData(this.baseline);
+			console.timeEnd("GetImage");
+			this.diffData = null;
+		}
+		if (this.current != current) {
+			this.current = current;
+			this.currentData = this.getImageData(this.current);
+			this.diffData = null;
+		}
 
 		const md0 = this.baseline.GetMetadata(0);
 		const md1 = this.current.GetMetadata(0);
 		if (md0.Width != md1.Width || md0.Height != md1.Height)
 			return;
 
-		let img = [this.baseline, this.current];
-		let data = img.map((e) => e.GetImage(0, 0, 0));
+		if (!this.diffData) {
+			this.diffData = new ImageData();
+			this.diffData.Width = md0.Width;
+			this.diffData.Height = md0.Height;
+			this.diffData.Depth = 1;
+			this.diffData.Format = PixFormat.R8G8B8A8_UNORM;
+			this.diffData.RowPitch = this.diffData.Width * 4; // Each row exactly 4 * width bytes without padding
+			this.diffData.SlicePitch = this.diffData.RowPitch * this.diffData.Height;
+			this.diffData.Data = new ArrayBuffer(this.diffData.SlicePitch * this.diffData.Depth);
+		}
+		let data = [this.baselineData, this.currentData];
 
-		// pixelmatch only accept R8G8B8A8_UNORM without data padding
-		data.forEach((d, i) => {
-			if (d.RowPitch != d.Width * 4 || PixFormat.R8G8B8A8_UNORM != d.Format) {
-				let dn = new ImageData();
-				dn.Width = d.Width;
-				dn.Height = d.Height;
-				dn.Depth = d.Depth;
-				dn.Format = PixFormat.R8G8B8A8_UNORM;
-				dn.RowPitch = dn.Width * 4; // Each row exactly 4 * width bytes without padding
-				dn.SlicePitch = dn.RowPitch * dn.Height;
-				dn.Data = new ArrayBuffer(dn.SlicePitch * dn.Depth);
-				img[i].CopyTo(dn, 0, 0, 0, 0, null, 0);
-				data[i] = dn;
-			}
-		});
+		//AveLib.AvePixelMatch(data[0].Data, data[1].Data, diffData.Data, md0.Width, md0.Height, { threshold: threshold, includeAA: true, alpha: blendAlpha });
+		console.time("pixelmatch");
+		pixelmatch(new Uint8Array(data[0].Data), new Uint8Array(data[1].Data), new Uint8Array(this.diffData.Data), md0.Width, md0.Height, { threshold: fThreshold, includeAA: true, alpha: blendAlpha });
+		console.timeEnd("pixelmatch");
 
-		const diffData = new ImageData();
-		diffData.Width = md0.Width;
-		diffData.Height = md0.Height;
-		diffData.Depth = 1;
-		diffData.Format = PixFormat.R8G8B8A8_UNORM;
-		diffData.RowPitch = diffData.Width * 4; // Each row exactly 4 * width bytes without padding
-		diffData.SlicePitch = diffData.RowPitch * diffData.Height;
-		diffData.Data = new ArrayBuffer(diffData.SlicePitch * diffData.Depth);
-
-		pixelmatch(new Uint8Array(data[0].Data), new Uint8Array(data[1].Data), new Uint8Array(diffData.Data), md0.Width, md0.Height, { threshold: threshold, includeAA: true, alpha: blendAlpha });
-
-		const diffImage = new AveImage();
-		if (!diffImage.Create2D(PixFormat.R8G8B8A8_UNORM, md0.Width, md0.Height, 1, 1))
-			return;
-		diffImage.CopyFrom(0, 0, 0, 0, diffData, ImageBox.Full(), 0);
-
-		this.view.updateRawImage(diffImage);
+		this.view.updateRawData(this.diffData);
 		this.pager.SetContentSize(new Vec2(md0.Width, md0.Height));
 	}
 

@@ -1,8 +1,9 @@
-import { AveImage, Byo2Image, Byo2ImageCreation, Byo2ImageDataType, IByo2Image, ImageData, ResourceSource, Window } from "ave-ui";
+import { AveImage, Byo2Image, Byo2ImageCreation, Byo2ImageDataType, IByo2Image, ImageData, ResourceSource, Window, ImageBox, Rect, InMemoryData } from "ave-ui";
 import { Component } from "./component";
 
 export interface INativeImage {
 	readPixel(x: number, y: number): { r: number; g: number; b: number; a: number };
+	updateData(data: ImageData);
 	data: AveImage;
 	native: IByo2Image;
 }
@@ -21,7 +22,7 @@ export class NativeRawImage extends Component implements INativeImage {
 	get data() {
 		return this.aveImage;
 	}
-	
+
 	get native() {
 		return this.byo2;
 	}
@@ -36,6 +37,11 @@ export class NativeRawImage extends Component implements INativeImage {
 		imgcp.Height = this.imgData.Height;
 		imgcp.Format = this.imgData.Format;
 		this.byo2 = new Byo2Image(this.window, imgcp);
+	}
+
+	updateData(data: ImageData) {
+		this.data.CopyFrom(0, 0, 0, 0, data, ImageBox.Full(), 0);
+		this.byo2.Upload(Rect.Empty, new InMemoryData(data.Data, data.RowPitch, data.SlicePitch));
 	}
 
 	readPixel(x: number, y: number) {
