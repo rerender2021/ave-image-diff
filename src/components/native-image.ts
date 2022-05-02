@@ -3,6 +3,7 @@ import { Component } from "./component";
 
 export interface INativeImage {
 	readPixel(x: number, y: number): { r: number; g: number; b: number; a: number };
+	data: AveImage;
 	native: IByo2Image;
 }
 
@@ -17,6 +18,10 @@ export class NativeRawImage extends Component implements INativeImage {
 		this.onCreate();
 	}
 
+	get data() {
+		return this.aveImage;
+	}
+	
 	get native() {
 		return this.byo2;
 	}

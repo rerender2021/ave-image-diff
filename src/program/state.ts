@@ -2,11 +2,13 @@ import { makeObservable, observable, action } from "mobx";
 
 export class ProgramState {
 	blink: boolean;
+	threshold: number;
 	blendAlpha: number;
 	zoom: number;
 
 	constructor() {
 		this.blink = false;
+		this.threshold = 0.0;
 		this.blendAlpha = 0.5;
 		this.zoom = 1;
 
@@ -14,12 +16,19 @@ export class ProgramState {
 			blink: observable,
 			setBlink: action,
 
+			threshold: observable,
+			setThreshold: action,
+
 			blendAlpha: observable,
 			setBlendAlpha: action,
 
 			zoom: observable,
 			setZoom: action,
 		});
+	}
+
+	setThreshold(threshold: number) {
+		this.threshold = threshold;
 	}
 
 	setBlendAlpha(alpha: number) {

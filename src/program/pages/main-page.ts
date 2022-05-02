@@ -1,4 +1,4 @@
-import { CheckBox, CheckValue, ScrollBar, TextBox } from "ave-ui";
+import { CheckBox, CheckValue, ScrollBar, TabButtonDisplay, TextBox, TrackBar } from "ave-ui";
 import { GridLayout, MiniView, Page } from "../../components";
 import { state } from "../state";
 import { DiffPage } from "./diff-page";
@@ -6,10 +6,14 @@ import * as debounce from "debounce";
 
 export class MainPage extends Page {
 	blinkCheckBox: CheckBox;
-	blendAlphaScroll: ScrollBar;
+	
+	thresholdScroll: TrackBar;
+	thresholdText: TextBox;
+
+	blendAlphaScroll: TrackBar;
 	blendAlphaText: TextBox;
 
-	zoomScroll: ScrollBar;
+	zoomScroll: TrackBar;
 	zoomText: TextBox;
 
 	miniView: MiniView;
@@ -27,33 +31,36 @@ export class MainPage extends Page {
 			state.setBlink(checkValue === CheckValue.Checked);
 		});
 
-		//
-		this.blendAlphaScroll = new ScrollBar(window);
-		this.blendAlphaScroll.SetMinimum(0).SetMaximum(100).SetValue(50).SetShrink(false);
-		this.blendAlphaScroll.OnScrolling(
-			debounce((sender: ScrollBar) => {
+		const createSlider = (nMin, nMax, nDef, s, fn): [TrackBar, TextBox] => {
+			const tb = new TrackBar(window);
+			tb.SetMinimum(nMin).SetMaximum(nMax).SetValue(nDef);
+			tb.OnThumbChange(fn);
+
+			const txt = new TextBox(window);
+			txt.SetReadOnly(true);
+			txt.SetBorder(false);
+			txt.SetText(s);
+
+			return [tb, txt];
+		}
+
+		[this.thresholdScroll, this.thresholdText] = createSlider(0, 100, 0, "Threshold",
+			debounce((sender: TrackBar) => {
+				state.setThreshold(sender.GetValue() / 100);
+			}, 300)
+		);
+
+		[this.blendAlphaScroll, this.blendAlphaText] = createSlider(0, 100, 50, "Blend Alpha",
+			debounce((sender: TrackBar) => {
 				state.setBlendAlpha(sender.GetValue() / 100);
 			}, 300)
 		);
 
-		this.blendAlphaText = new TextBox(window);
-		this.blendAlphaText.SetReadOnly(true);
-		this.blendAlphaText.SetBorder(false);
-		this.blendAlphaText.SetText("Blend Alpha");
-
-		//
-		this.zoomScroll = new ScrollBar(window);
-		this.zoomScroll.SetMinimum(1).SetMaximum(5).SetValue(1).SetShrink(false);
-		this.zoomScroll.OnScrolling(
-			debounce((sender: ScrollBar) => {
+		[this.zoomScroll, this.zoomText] = createSlider(1, 16, 1, "Zoom",
+			(sender: TrackBar) => {
 				state.setZoom(sender.GetValue());
-			}, 300)
+			}
 		);
-
-		this.zoomText = new TextBox(window);
-		this.zoomText.SetReadOnly(true);
-		this.zoomText.SetBorder(false);
-		this.zoomText.SetText("Zoom");
 
 		//
 		this.miniView = new MiniView(window);
@@ -84,15 +91,17 @@ export class MainPage extends Page {
 		const container = new GridLayout<keyof typeof containerLayout.areas>(window, containerLayout);
 
 		const controlLayout = {
-			rows: "32dpx 128px 32dpx 16dpx 16dpx 16dpx 16dpx 16dpx 1",
+			rows: "32dpx 128px 32dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 1",
 			columns: "1 1",
 			areas: {
 				miniView: { x: 0, y: 1, xspan: 2, yspan: 1 },
 				blink: { x: 0, y: 3 },
-				blendAlphaText: { x: 0, y: 5 },
-				blendAlpha: { x: 1, y: 5 },
-				zoomText: { x: 0, y: 7 },
-				zoom: { x: 1, y: 7 },
+				thresholdText: { x: 0, y: 5 },
+				threshold: { x: 1, y: 5 },
+				blendAlphaText: { x: 0, y: 7 },
+				blendAlpha: { x: 1, y: 7 },
+				zoomText: { x: 0, y: 9 },
+				zoom: { x: 1, y: 9 },
 			},
 		};
 		const controlGrid = new GridLayout<keyof typeof controlLayout.areas>(window, controlLayout);
@@ -101,6 +110,9 @@ export class MainPage extends Page {
 		container.addControl(controlGrid.control, container.areas.control);
 
 		controlGrid.addControl(this.blinkCheckBox, controlGrid.areas.blink);
+
+		controlGrid.addControl(this.thresholdText, controlGrid.areas.thresholdText);
+		controlGrid.addControl(this.thresholdScroll, controlGrid.areas.threshold);
 
 		controlGrid.addControl(this.blendAlphaText, controlGrid.areas.blendAlphaText);
 		controlGrid.addControl(this.blendAlphaScroll, controlGrid.areas.blendAlpha);

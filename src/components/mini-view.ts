@@ -88,6 +88,7 @@ export class MiniView extends Component {
 					if (width > rc.w) vPos.x = -Math.max(0, ((v.x - rcImage.x) / rcImage.w) * sm.x - rcp.w * 0.5);
 					if (height > rc.h) vPos.y = -Math.max(0, ((v.y - rcImage.y) / rcImage.h) * sm.y - rcp.h * 0.5);
 					pager.SetScrollPosition(vPos, false);
+					this.window.Update();
 				}
 			});
 		};
