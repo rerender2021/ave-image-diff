@@ -1,10 +1,11 @@
-import { AlignType, Pager, ResourceSource, Vec2 } from "ave-ui";
+import { AlignType, MessagePointer, Pager, PointerButton, ResourceSource, Vec2 } from "ave-ui";
 import { autorun } from "mobx";
 import { GridLayout, ImageView, Page, ZoomView } from "../../components";
 import { assetBuffer } from "../../utils";
 import { BlinkDiffView } from "../components/blink-diff-view";
 import { NormalDiffView } from "../components/normal-diff-view";
 import { state } from "../state";
+import { PixelateView } from "../../components/pixelate-view";
 
 export class DiffPage extends Page {
 	baselinePager: Pager;
@@ -20,6 +21,13 @@ export class DiffPage extends Page {
 
 	baselineZoomView: ZoomView;
 	currentZoomView: ZoomView;
+	pixelateView: PixelateView;
+
+	dragMoving: boolean = false;
+	dragStartScrollPos: Vec2 = Vec2.Zero;
+	dragStartPointerPos: Vec2 = Vec2.Zero;
+
+	pager: Pager[];
 
 	onCreate(): GridLayout {
 		const { window } = this;
@@ -45,14 +53,19 @@ export class DiffPage extends Page {
 		this.currentPager.SetContentVerticalAlign(AlignType.Center);
 
 		//
-		this.normalDiffView = new NormalDiffView(window, this.app);
+		this.normalDiffView = new NormalDiffView(window);
 		this.blinkDiffView = new BlinkDiffView(window, this.app);
 
 		[this.normalDiffView, this.blinkDiffView, this.baselineImage, this.currentImage].forEach((each) => {
-			each.control.OnPointerMove((sender, mp) => {
-				const pos = mp.Position;
-				this.onPointerMove(pos);
-			});
+			each.control.OnPointerPress((sender, mp) => this.onPointerPress(mp));
+			each.control.OnPointerRelease((sender, mp) => this.onPointerRelease(mp));
+			each.control.OnPointerMove((sender, mp) => this.onPointerMove(mp));
+		});
+
+		this.pager = [this.baselinePager, this.currentPager, this.normalDiffView.container, this.blinkDiffView.contrainer];
+
+		this.pager.forEach((e) => {
+			e.OnScroll((sender) => this.onPagerScroll(sender));
 		});
 
 		this.update();
@@ -119,7 +132,7 @@ export class DiffPage extends Page {
 	update() {
 		const codec = this.app.GetImageCodec();
 
-		const baselineBuffer = assetBuffer("map-baseline.png");
+		let baselineBuffer = assetBuffer("map-baseline.png");
 		const currentBuffer = assetBuffer("map-current.png");
 
 		this.baselineSource = ResourceSource.FromBuffer(baselineBuffer);
@@ -129,15 +142,58 @@ export class DiffPage extends Page {
 		this.currentImage.updateRawImage(codec.Open(this.currentSource));
 
 		//
-		this.normalDiffView.update(baselineBuffer, currentBuffer);
+		this.normalDiffView.update(this.baselineImage.data, this.currentImage.data);
 
 		//
 		this.baselineZoomView.track({ image: this.baselineImage.native });
 		this.currentZoomView.track({ image: this.currentImage.native });
+
+
+		autorun(() => {
+			const pixelSize = state.zoom;
+			const resizedSize = new Vec2(this.baselineImage.width * pixelSize, this.baselineImage.height * pixelSize);
+			this.baselinePager.SetContentSize(resizedSize);
+			this.currentPager.SetContentSize(resizedSize);
+			this.normalDiffView.setZoom(pixelSize);
+		});
+
 	}
 
-	onPointerMove(pos: Vec2) {
-		this.baselineZoomView.updatePixelPos(pos);
-		this.currentZoomView.updatePixelPos(pos);
+	onPointerPress(mp: MessagePointer) {
+		if (PointerButton.First == mp.Button) {
+			this.dragMoving = true;
+			this.dragStartPointerPos = this.window.GetPlatform().PointerGetPosition();
+			this.dragStartScrollPos = this.baselinePager.GetScrollPosition();
+		}
+	}
+
+	onPointerRelease(mp: MessagePointer) {
+		if (PointerButton.First == mp.Button) {
+			this.dragMoving = false;
+		}
+	}
+
+	onPointerMove(mp: MessagePointer) {
+		if (this.dragMoving) {
+			const vPos = this.window.GetPlatform().PointerGetPosition();
+			const vNewScroll = this.dragStartScrollPos.Add(vPos.Sub(this.dragStartPointerPos));
+			this.pager.forEach((e) => e.SetScrollPosition(vNewScroll, false));
+			this.window.Update();
+		} else {
+			const vPos = mp.Position.Div(state.zoom);
+			vPos.x = Math.floor(vPos.x);
+			vPos.y = Math.floor(vPos.y);
+			this.baselineZoomView.updatePixelPos(vPos);
+			this.currentZoomView.updatePixelPos(vPos);
+		}
+	}
+
+	onPagerScroll(sender: Pager) {
+		const vNewScroll = sender.GetScrollPosition();
+		this.pager.forEach((e) => {
+			if (sender != e)
+				e.SetScrollPosition(vNewScroll, false)
+		});
+		this.window.Update();
 	}
 }

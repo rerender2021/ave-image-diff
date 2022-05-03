@@ -1,16 +1,16 @@
 import { Component, ImageView } from "../../components";
-import { AlignType, App, Pager, ResourceSource, Window } from "ave-ui";
-import * as pixelmatch from "pixelmatch";
-import { PNG } from "pngjs";
+import { AlignType, AveImage, Pager, PixFormat, Vec2, Window, ImageData, AveLib } from "ave-ui";
 import { state } from "../state";
 import { autorun } from "mobx";
 
 export class NormalDiffView extends Component {
 	private view: ImageView;
 	private pager: Pager;
-	private baseline: Buffer;
-	private current: Buffer;
-	private app: App;
+	private baseline: AveImage;
+	private current: AveImage;
+	private baselineData: ImageData;
+	private currentData: ImageData;
+	private diffData: ImageData;
 
 	get control() {
 		return this.view.control;
@@ -20,9 +20,8 @@ export class NormalDiffView extends Component {
 		return this.pager;
 	}
 
-	constructor(window: Window, app: App) {
+	constructor(window: Window) {
 		super(window);
-		this.app = app;
 		this.onCreate();
 	}
 
@@ -40,30 +39,71 @@ export class NormalDiffView extends Component {
 
 	watch() {
 		autorun(() => {
-			this.update(this.baseline, this.current, state.blendAlpha);
+			this.update(this.baseline, this.current, state.threshold, state.blendAlpha);
 		});
 	}
 
-	update(baseline: Buffer, current: Buffer, blendAlpha = 0.5) {
+	private getImageData(img: AveImage) {
+		const data = img.GetImage(0, 0, 0);
+		if (data.RowPitch != data.Width * 4 || PixFormat.R8G8B8A8_UNORM != data.Format) {
+			const dn = new ImageData();
+			dn.Width = data.Width;
+			dn.Height = data.Height;
+			dn.Depth = data.Depth;
+			dn.Format = PixFormat.R8G8B8A8_UNORM;
+			dn.RowPitch = dn.Width * 4; // Each row exactly 4 * width bytes without padding
+			dn.SlicePitch = dn.RowPitch * dn.Height;
+			dn.Data = new ArrayBuffer(dn.SlicePitch * dn.Depth);
+			img.CopyTo(dn, 0, 0, 0, 0, null, 0);
+			return dn;
+		}
+		return data;
+	}
+
+	update(baseline: AveImage, current: AveImage, fThreshold = 0, blendAlpha = 0.5) {
 		if (!baseline || !current) {
 			return;
 		}
 
-		this.baseline = baseline;
-		this.current = current;
+		if (this.baseline != baseline) {
+			this.baseline = baseline;
+			console.time("GetImage");
+			this.baselineData = this.getImageData(this.baseline);
+			console.timeEnd("GetImage");
+			this.diffData = null;
+		}
+		if (this.current != current) {
+			this.current = current;
+			this.currentData = this.getImageData(this.current);
+			this.diffData = null;
+		}
 
-		const baselinePNG = PNG.sync.read(baseline);
-		const currentPNG = PNG.sync.read(current);
+		const md0 = this.baseline.GetMetadata(0);
+		const md1 = this.current.GetMetadata(0);
+		if (md0.Width != md1.Width || md0.Height != md1.Height) return;
 
-		const { width, height } = baselinePNG;
-		const diffPNG = new PNG({ width, height });
+		if (!this.diffData) {
+			this.diffData = new ImageData();
+			this.diffData.Width = md0.Width;
+			this.diffData.Height = md0.Height;
+			this.diffData.Depth = 1;
+			this.diffData.Format = PixFormat.R8G8B8A8_UNORM;
+			this.diffData.RowPitch = this.diffData.Width * 4; // Each row exactly 4 * width bytes without padding
+			this.diffData.SlicePitch = this.diffData.RowPitch * this.diffData.Height;
+			this.diffData.Data = new ArrayBuffer(this.diffData.SlicePitch * this.diffData.Depth);
+		}
+		let data = [this.baselineData, this.currentData];
 
-		pixelmatch(baselinePNG.data, currentPNG.data, diffPNG.data, width, height, { threshold: 0, includeAA: true, alpha: blendAlpha });
-		const diffBuffer = PNG.sync.write(diffPNG);
+		console.time("pixelmatch");
+		AveLib.AvePixelMatch(data[0].Data, data[1].Data, this.diffData.Data, md0.Width, md0.Height, { threshold: fThreshold, includeAA: true, alpha: blendAlpha });
+		console.timeEnd("pixelmatch");
 
-		// fs.writeFileSync("diff.png", diffBuffer);
-		const codec = this.app.GetImageCodec();
-		this.view.updateRawImage(codec.Open(ResourceSource.FromBuffer(diffBuffer)));
+		this.view.updateRawData(this.diffData);
+		this.pager.SetContentSize(new Vec2(md0.Width, md0.Height));
+	}
+
+	setZoom(zoom: number) {
+		this.pager.SetContentSize(new Vec2(this.view.width * zoom, this.view.height * zoom));
 	}
 
 	show(): void {
