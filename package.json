@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "ave-ui": "file:ave-ui-0.1.4.tgz",
+    "color": "^4.2.3",
     "mobx": "^6.5.0"
   }
 }

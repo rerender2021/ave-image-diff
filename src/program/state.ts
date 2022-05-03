@@ -1,4 +1,4 @@
-import { Vec2 } from "ave-ui";
+import { Vec2, Vec4 } from "ave-ui";
 import { makeObservable, observable, action } from "mobx";
 
 export class ProgramState {
@@ -7,6 +7,10 @@ export class ProgramState {
 	blendAlpha: number;
 	zoom: number;
 	pixelPos: Vec2;
+	pixelColor: {
+		baseline: Vec4;
+		current: Vec4;
+	};
 
 	constructor() {
 		this.blink = false;
@@ -14,6 +18,10 @@ export class ProgramState {
 		this.blendAlpha = 0.5;
 		this.zoom = 1;
 		this.pixelPos = new Vec2(0, 0);
+		this.pixelColor = {
+			baseline: new Vec4(0, 0, 0, 0),
+			current: new Vec4(0, 0, 0, 0),
+		};
 
 		makeObservable(this, {
 			blink: observable,
@@ -30,7 +38,14 @@ export class ProgramState {
 
 			pixelPos: observable,
 			setPixelPos: action,
+
+			pixelColor: observable,
+			setPixelColor: action,
 		});
+	}
+
+	setPixelColor(color: { baseline: Vec4; current: Vec4 }) {
+		this.pixelColor = color;
 	}
 
 	setPixelPos(pos: Vec2) {
