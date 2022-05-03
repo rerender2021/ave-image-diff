@@ -1,4 +1,4 @@
-import { AlignType, MessagePointer, Pager, PointerButton, ResourceSource, Vec2 } from "ave-ui";
+import { AlignType, IControl, MessagePointer, Pager, PointerButton, ResourceSource, TextBox, Vec2 } from "ave-ui";
 import { autorun } from "mobx";
 import { GridLayout, ImageView, Page, ZoomView } from "../../components";
 import { assetBuffer } from "../../utils";
@@ -18,6 +18,8 @@ export class DiffPage extends Page {
 	blinkDiffView: BlinkDiffView;
 
 	baselineZoomView: ZoomView;
+	baselinePosText: TextBox;
+
 	currentZoomView: ZoomView;
 
 	dragMoving: boolean = false;
@@ -35,19 +37,18 @@ export class DiffPage extends Page {
 
 		//
 		this.baselineImage = new ImageView(window);
-
-		this.baselinePager = new Pager(window);
-		this.baselinePager.SetContent(this.baselineImage.control);
-		this.baselinePager.SetContentHorizontalAlign(AlignType.Center);
-		this.baselinePager.SetContentVerticalAlign(AlignType.Center);
-
-		//
 		this.currentImage = new ImageView(window);
 
-		this.currentPager = new Pager(window);
-		this.currentPager.SetContent(this.currentImage.control);
-		this.currentPager.SetContentHorizontalAlign(AlignType.Center);
-		this.currentPager.SetContentVerticalAlign(AlignType.Center);
+		const createPager = (content: IControl) => {
+			const pager = new Pager(window);
+			pager.SetContent(content);
+			pager.SetContentHorizontalAlign(AlignType.Center);
+			pager.SetContentVerticalAlign(AlignType.Center);
+			return pager;
+		};
+
+		this.baselinePager = createPager(this.baselineImage.control);
+		this.currentPager = createPager(this.currentImage.control);
 
 		//
 		this.normalDiffView = new NormalDiffView(window);
@@ -64,6 +65,17 @@ export class DiffPage extends Page {
 		this.pager.forEach((e) => {
 			e.OnScroll((sender) => this.onPagerScroll(sender));
 		});
+
+		//
+		const createText = (s: string): TextBox => {
+			const txt = new TextBox(window);
+			txt.SetReadOnly(true);
+			txt.SetBorder(false);
+			txt.SetText(s);
+			return txt;
+		};
+
+		this.baselinePosText = createText("pos: 200, 300");
 
 		this.update();
 		this.watch();
@@ -91,11 +103,12 @@ export class DiffPage extends Page {
 		const container = new GridLayout<keyof typeof containerLayout.areas>(window, containerLayout);
 
 		const zoomLayout = {
-			rows: "1 192dpx 1",
+			rows: "1 192dpx 4px 16px 1",
 			columns: "1 192dpx 16dpx 192dpx 1",
 			areas: {
 				baseline: { x: 1, y: 1 },
 				current: { x: 3, y: 1 },
+				baselinePosText: { x: 1, y: 3},
 			},
 		};
 
@@ -110,6 +123,9 @@ export class DiffPage extends Page {
 		container.addControl(zoomGrid.control, container.areas.zoom);
 		zoomGrid.addControl(this.baselineZoomView.control, zoomGrid.areas.baseline);
 		zoomGrid.addControl(this.currentZoomView.control, zoomGrid.areas.current);
+
+		//
+		zoomGrid.addControl(this.baselinePosText, zoomGrid.areas.baselinePosText);
 
 		return container;
 	}

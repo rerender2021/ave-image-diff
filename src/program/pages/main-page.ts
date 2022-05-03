@@ -33,20 +33,22 @@ export class MainPage extends Page {
 			state.setBlink(checkValue === CheckValue.Checked);
 		});
 
-		this.blinkText = new TextBox(window);
-		this.blinkText.SetReadOnly(true);
-		this.blinkText.SetBorder(false);
-		this.blinkText.SetText("Mode");
+		const createText = (s: string): TextBox => {
+			const txt = new TextBox(window);
+			txt.SetReadOnly(true);
+			txt.SetBorder(false);
+			txt.SetText(s);
+			return txt;
+		};
+
+		this.blinkText = createText("Mode");
 
 		const createSlider = (nMin, nMax, nDef, s, fn): [TrackBar, TextBox] => {
 			const tb = new TrackBar(window);
 			tb.SetMinimum(nMin).SetMaximum(nMax).SetValue(nDef);
 			tb.OnThumbChange(fn);
 
-			const txt = new TextBox(window);
-			txt.SetReadOnly(true);
-			txt.SetBorder(false);
-			txt.SetText(s);
+			const txt = createText(s);
 
 			return [tb, txt];
 		};
@@ -65,10 +67,7 @@ export class MainPage extends Page {
 
 		//
 		this.miniView = new MiniView(window);
-		this.miniViewText = new TextBox(window);
-		this.miniViewText.SetReadOnly(true);
-		this.miniViewText.SetBorder(false);
-		this.miniViewText.SetText("Mini View");
+		this.miniViewText = createText("Mini View");
 
 		//
 		this.miniViewSwitch = new ComboBox(window);
