@@ -21,6 +21,7 @@ export class DiffPage extends Page {
 	baselinePosText: TextBox;
 
 	currentZoomView: ZoomView;
+	currentPosText: TextBox;
 
 	dragMoving: boolean = false;
 	dragStartScrollPos: Vec2 = Vec2.Zero;
@@ -75,7 +76,8 @@ export class DiffPage extends Page {
 			return txt;
 		};
 
-		this.baselinePosText = createText("pos: 200, 300");
+		this.baselinePosText = createText("Baseline Position:");
+		this.currentPosText = createText("Current Position:");
 
 		this.update();
 		this.watch();
@@ -107,8 +109,9 @@ export class DiffPage extends Page {
 			columns: "1 192dpx 16dpx 192dpx 1",
 			areas: {
 				baseline: { x: 1, y: 1 },
+				baselinePosText: { x: 1, y: 3 },
 				current: { x: 3, y: 1 },
-				baselinePosText: { x: 1, y: 3},
+				currentPosText: { x: 3, y: 3 },
 			},
 		};
 
@@ -126,6 +129,7 @@ export class DiffPage extends Page {
 
 		//
 		zoomGrid.addControl(this.baselinePosText, zoomGrid.areas.baselinePosText);
+		zoomGrid.addControl(this.currentPosText, zoomGrid.areas.currentPosText);
 
 		return container;
 	}
@@ -139,6 +143,11 @@ export class DiffPage extends Page {
 				this.normalDiffView.show();
 				this.blinkDiffView.hide();
 			}
+		});
+
+		autorun(() => {
+			this.baselinePosText.SetText(`Baseline Position: ${state.pixelPos.x}, ${state.pixelPos.y}`);
+			this.currentPosText.SetText(`Current Position: ${state.pixelPos.x}, ${state.pixelPos.y}`);
 		});
 	}
 
@@ -196,6 +205,7 @@ export class DiffPage extends Page {
 			vPos.y = Math.floor(vPos.y);
 			this.baselineZoomView.updatePixelPos(vPos);
 			this.currentZoomView.updatePixelPos(vPos);
+			state.setPixelPos(vPos);
 		}
 	}
 
