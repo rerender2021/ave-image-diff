@@ -1,11 +1,10 @@
-import { AlignType, MessagePointer, Pager, PointerButton, ResourceSource, Vec2 } from "ave-ui";
+import { AlignType, IControl, MessagePointer, Pager, PointerButton, ResourceSource, TextBox, Vec2 } from "ave-ui";
 import { autorun } from "mobx";
+import * as Color from "color";
 import { GridLayout, ImageView, Page, ZoomView } from "../../components";
 import { assetBuffer } from "../../utils";
-import { BlinkDiffView } from "../components/blink-diff-view";
-import { NormalDiffView } from "../components/normal-diff-view";
+import { BlinkDiffView, NormalDiffView } from "../components";
 import { state } from "../state";
-import { PixelateView } from "../../components/pixelate-view";
 
 export class DiffPage extends Page {
 	baselinePager: Pager;
@@ -20,8 +19,14 @@ export class DiffPage extends Page {
 	blinkDiffView: BlinkDiffView;
 
 	baselineZoomView: ZoomView;
+	baselinePosText: TextBox;
+	baselineColorText: TextBox;
+	baselineHexText: TextBox;
+
 	currentZoomView: ZoomView;
-	pixelateView: PixelateView;
+	currentPosText: TextBox;
+	currentColorText: TextBox;
+	currentHexText: TextBox;
 
 	dragMoving: boolean = false;
 	dragStartScrollPos: Vec2 = Vec2.Zero;
@@ -38,19 +43,18 @@ export class DiffPage extends Page {
 
 		//
 		this.baselineImage = new ImageView(window);
-
-		this.baselinePager = new Pager(window);
-		this.baselinePager.SetContent(this.baselineImage.control);
-		this.baselinePager.SetContentHorizontalAlign(AlignType.Center);
-		this.baselinePager.SetContentVerticalAlign(AlignType.Center);
-
-		//
 		this.currentImage = new ImageView(window);
 
-		this.currentPager = new Pager(window);
-		this.currentPager.SetContent(this.currentImage.control);
-		this.currentPager.SetContentHorizontalAlign(AlignType.Center);
-		this.currentPager.SetContentVerticalAlign(AlignType.Center);
+		const createPager = (content: IControl) => {
+			const pager = new Pager(window);
+			pager.SetContent(content);
+			pager.SetContentHorizontalAlign(AlignType.Center);
+			pager.SetContentVerticalAlign(AlignType.Center);
+			return pager;
+		};
+
+		this.baselinePager = createPager(this.baselineImage.control);
+		this.currentPager = createPager(this.currentImage.control);
 
 		//
 		this.normalDiffView = new NormalDiffView(window);
@@ -67,6 +71,24 @@ export class DiffPage extends Page {
 		this.pager.forEach((e) => {
 			e.OnScroll((sender) => this.onPagerScroll(sender));
 		});
+
+		//
+		const createText = (s: string): TextBox => {
+			const txt = new TextBox(window);
+			txt.SetReadOnly(true);
+			txt.SetBorder(false);
+			txt.SetText(s);
+			return txt;
+		};
+
+		this.baselinePosText = createText("Baseline Position:");
+		this.currentPosText = createText("Current Position:");
+
+		this.baselineColorText = createText("RGBA:");
+		this.currentColorText = createText("RGBA:");
+
+		this.baselineHexText = createText("Hex:");
+		this.currentHexText = createText("Hex:");
 
 		this.update();
 		this.watch();
@@ -94,11 +116,17 @@ export class DiffPage extends Page {
 		const container = new GridLayout<keyof typeof containerLayout.areas>(window, containerLayout);
 
 		const zoomLayout = {
-			rows: "1 192dpx 1",
+			rows: "1 192dpx 4dpx 16dpx 4dpx 16dpx 4dpx 16dpx 1",
 			columns: "1 192dpx 16dpx 192dpx 1",
 			areas: {
 				baseline: { x: 1, y: 1 },
+				baselinePosText: { x: 1, y: 3 },
+				baselineColorText: { x: 1, y: 5 },
+				baselineHexText: { x: 1, y: 7 },
 				current: { x: 3, y: 1 },
+				currentPosText: { x: 3, y: 3 },
+				currentColorText: { x: 3, y: 5 },
+				currentHexText: { x: 3, y: 7 },
 			},
 		};
 
@@ -114,6 +142,16 @@ export class DiffPage extends Page {
 		zoomGrid.addControl(this.baselineZoomView.control, zoomGrid.areas.baseline);
 		zoomGrid.addControl(this.currentZoomView.control, zoomGrid.areas.current);
 
+		//
+		zoomGrid.addControl(this.baselinePosText, zoomGrid.areas.baselinePosText);
+		zoomGrid.addControl(this.currentPosText, zoomGrid.areas.currentPosText);
+
+		zoomGrid.addControl(this.baselineColorText, zoomGrid.areas.baselineColorText);
+		zoomGrid.addControl(this.currentColorText, zoomGrid.areas.currentColorText);
+
+		zoomGrid.addControl(this.baselineHexText, zoomGrid.areas.baselineHexText);
+		zoomGrid.addControl(this.currentHexText, zoomGrid.areas.currentHexText);
+
 		return container;
 	}
 
@@ -126,6 +164,20 @@ export class DiffPage extends Page {
 				this.normalDiffView.show();
 				this.blinkDiffView.hide();
 			}
+		});
+
+		autorun(() => {
+			this.baselinePosText.SetText(`Baseline Position: ${state.pixelPos.x}, ${state.pixelPos.y}`);
+			this.currentPosText.SetText(`Current Position: ${state.pixelPos.x}, ${state.pixelPos.y}`);
+
+			const baseline = state.pixelColor.baseline;
+			const current = state.pixelColor.current;
+
+			this.baselineColorText.SetText(`RGBA: ${baseline.r}, ${baseline.g}, ${baseline.b}, ${baseline.a}`);
+			this.currentColorText.SetText(`RGBA: ${current.r}, ${current.g}, ${current.b}, ${current.a}`);
+
+			this.baselineHexText.SetText(`Hex: ${Color({ r: baseline.r, g: baseline.g, b: baseline.b }).hex()}`);
+			this.currentHexText.SetText(`Hex: ${Color({ r: current.r, g: current.g, b: current.b }).hex()}`);
 		});
 	}
 
@@ -148,7 +200,6 @@ export class DiffPage extends Page {
 		this.baselineZoomView.track({ image: this.baselineImage.native });
 		this.currentZoomView.track({ image: this.currentImage.native });
 
-
 		autorun(() => {
 			const pixelSize = state.zoom;
 			const resizedSize = new Vec2(this.baselineImage.width * pixelSize, this.baselineImage.height * pixelSize);
@@ -156,7 +207,6 @@ export class DiffPage extends Page {
 			this.currentPager.SetContentSize(resizedSize);
 			this.normalDiffView.setZoom(pixelSize);
 		});
-
 	}
 
 	onPointerPress(mp: MessagePointer) {
@@ -185,14 +235,18 @@ export class DiffPage extends Page {
 			vPos.y = Math.floor(vPos.y);
 			this.baselineZoomView.updatePixelPos(vPos);
 			this.currentZoomView.updatePixelPos(vPos);
+			state.setPixelPos(vPos);
+			state.setPixelColor({
+				baseline: this.baselineImage.readPixel(vPos.x, vPos.y),
+				current: this.currentImage.readPixel(vPos.x, vPos.y),
+			});
 		}
 	}
 
 	onPagerScroll(sender: Pager) {
 		const vNewScroll = sender.GetScrollPosition();
 		this.pager.forEach((e) => {
-			if (sender != e)
-				e.SetScrollPosition(vNewScroll, false)
+			if (sender != e) e.SetScrollPosition(vNewScroll, false);
 		});
 		this.window.Update();
 	}

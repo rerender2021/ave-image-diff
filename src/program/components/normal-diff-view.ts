@@ -1,5 +1,5 @@
 import { Component, ImageView } from "../../components";
-import { AlignType, AveImage, Pager, PixFormat, Vec2, Window, ImageData, AveLib } from "ave-ui";
+import { AlignType, AveImage, Pager, PixFormat, Vec2, Window, ImageData, AveLib, AveGetImageProcessor } from "ave-ui";
 import { state } from "../state";
 import { autorun } from "mobx";
 
@@ -95,7 +95,8 @@ export class NormalDiffView extends Component {
 		let data = [this.baselineData, this.currentData];
 
 		console.time("pixelmatch");
-		AveLib.AvePixelMatch(data[0].Data, data[1].Data, this.diffData.Data, md0.Width, md0.Height, { threshold: fThreshold, includeAA: true, alpha: blendAlpha });
+		const processor = AveGetImageProcessor();
+		processor.PixelMatch(data[0].Data, data[1].Data, this.diffData.Data, md0.Width, md0.Height, { threshold: fThreshold, includeAA: true, alpha: blendAlpha });
 		console.timeEnd("pixelmatch");
 
 		this.view.updateRawData(this.diffData);
