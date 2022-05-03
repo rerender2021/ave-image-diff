@@ -1,5 +1,5 @@
 import { App, WindowCreation, Window, WindowFlag } from "ave-ui";
-import { MainPage } from "./pages/main-page";
+import { MainPage } from "./pages";
 
 export class Program {
 	app: App;

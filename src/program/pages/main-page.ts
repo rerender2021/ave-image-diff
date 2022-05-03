@@ -72,7 +72,7 @@ export class MainPage extends Page {
 
 		//
 		this.miniViewSwitch = new ComboBox(window);
-		this.miniViewSwitch.Append("Baseline", "Switch");
+		this.miniViewSwitch.Append("Baseline", "Current");
 		this.miniViewSwitch.Select(0);
 		this.miniViewSwitch.OnSelectionChange((comboBox: ComboBox) => {
 			const i = comboBox.GetSelection();

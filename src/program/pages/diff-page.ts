@@ -2,10 +2,8 @@ import { AlignType, MessagePointer, Pager, PointerButton, ResourceSource, Vec2 }
 import { autorun } from "mobx";
 import { GridLayout, ImageView, Page, ZoomView } from "../../components";
 import { assetBuffer } from "../../utils";
-import { BlinkDiffView } from "../components/blink-diff-view";
-import { NormalDiffView } from "../components/normal-diff-view";
+import { BlinkDiffView, NormalDiffView } from "../components";
 import { state } from "../state";
-import { PixelateView } from "../../components/pixelate-view";
 
 export class DiffPage extends Page {
 	baselinePager: Pager;
@@ -21,7 +19,6 @@ export class DiffPage extends Page {
 
 	baselineZoomView: ZoomView;
 	currentZoomView: ZoomView;
-	pixelateView: PixelateView;
 
 	dragMoving: boolean = false;
 	dragStartScrollPos: Vec2 = Vec2.Zero;
@@ -148,7 +145,6 @@ export class DiffPage extends Page {
 		this.baselineZoomView.track({ image: this.baselineImage.native });
 		this.currentZoomView.track({ image: this.currentImage.native });
 
-
 		autorun(() => {
 			const pixelSize = state.zoom;
 			const resizedSize = new Vec2(this.baselineImage.width * pixelSize, this.baselineImage.height * pixelSize);
@@ -156,7 +152,6 @@ export class DiffPage extends Page {
 			this.currentPager.SetContentSize(resizedSize);
 			this.normalDiffView.setZoom(pixelSize);
 		});
-
 	}
 
 	onPointerPress(mp: MessagePointer) {
@@ -191,8 +186,7 @@ export class DiffPage extends Page {
 	onPagerScroll(sender: Pager) {
 		const vNewScroll = sender.GetScrollPosition();
 		this.pager.forEach((e) => {
-			if (sender != e)
-				e.SetScrollPosition(vNewScroll, false)
+			if (sender != e) e.SetScrollPosition(vNewScroll, false);
 		});
 		this.window.Update();
 	}
