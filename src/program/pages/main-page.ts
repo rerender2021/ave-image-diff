@@ -1,8 +1,7 @@
-import { CheckBox, CheckValue, ScrollBar, TabButtonDisplay, TextBox, TrackBar } from "ave-ui";
+import { CheckBox, CheckValue, TextBox, TrackBar } from "ave-ui";
 import { GridLayout, MiniView, Page } from "../../components";
 import { state } from "../state";
 import { DiffPage } from "./diff-page";
-import * as debounce from "debounce";
 
 export class MainPage extends Page {
 	blinkCheckBox: CheckBox;
@@ -48,18 +47,12 @@ export class MainPage extends Page {
 			(sender: TrackBar) => {
 				state.setThreshold(sender.GetValue() / 100);
 			}
-			// debounce((sender: TrackBar) => {
-			// 	state.setThreshold(sender.GetValue() / 100);
-			// }, 300)
 		);
 
 		[this.blendAlphaScroll, this.blendAlphaText] = createSlider(0, 100, 50, "Blend Alpha",
 			(sender: TrackBar) => {
 				state.setBlendAlpha(sender.GetValue() / 100);
 			}
-			// debounce((sender: TrackBar) => {
-			// 	state.setBlendAlpha(sender.GetValue() / 100);
-			// }, 300)
 		);
 
 		[this.zoomScroll, this.zoomText] = createSlider(1, 16, 1, "Zoom",

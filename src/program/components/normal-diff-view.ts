@@ -1,7 +1,5 @@
 import { Component, ImageView } from "../../components";
-import { AlignType, App, AveImage, Pager, PixFormat, ResourceSource, Vec2, Window, ImageData, ImageBox, AveLib } from "ave-ui";
-import * as pixelmatch from "pixelmatch";
-import { PNG } from "pngjs";
+import { AlignType, AveImage, Pager, PixFormat, Vec2, Window, ImageData, AveLib } from "ave-ui";
 import { state } from "../state";
 import { autorun } from "mobx";
 
@@ -13,9 +11,6 @@ export class NormalDiffView extends Component {
 	private baselineData: ImageData;
 	private currentData: ImageData;
 	private diffData: ImageData;
-	//private baseline: Buffer;
-	//private current: Buffer;
-	private app: App;
 
 	get control() {
 		return this.view.control;
@@ -25,9 +20,8 @@ export class NormalDiffView extends Component {
 		return this.pager;
 	}
 
-	constructor(window: Window, app: App) {
+	constructor(window: Window) {
 		super(window);
-		this.app = app;
 		this.onCreate();
 	}
 
@@ -86,8 +80,7 @@ export class NormalDiffView extends Component {
 
 		const md0 = this.baseline.GetMetadata(0);
 		const md1 = this.current.GetMetadata(0);
-		if (md0.Width != md1.Width || md0.Height != md1.Height)
-			return;
+		if (md0.Width != md1.Width || md0.Height != md1.Height) return;
 
 		if (!this.diffData) {
 			this.diffData = new ImageData();
@@ -101,41 +94,13 @@ export class NormalDiffView extends Component {
 		}
 		let data = [this.baselineData, this.currentData];
 
-		//AveLib.AvePixelMatch(data[0].Data, data[1].Data, diffData.Data, md0.Width, md0.Height, { threshold: threshold, includeAA: true, alpha: blendAlpha });
 		console.time("pixelmatch");
-		pixelmatch(new Uint8Array(data[0].Data), new Uint8Array(data[1].Data), new Uint8Array(this.diffData.Data), md0.Width, md0.Height, { threshold: fThreshold, includeAA: true, alpha: blendAlpha });
+		AveLib.AvePixelMatch(data[0].Data, data[1].Data, this.diffData.Data, md0.Width, md0.Height, { threshold: fThreshold, includeAA: true, alpha: blendAlpha });
 		console.timeEnd("pixelmatch");
 
 		this.view.updateRawData(this.diffData);
 		this.pager.SetContentSize(new Vec2(md0.Width, md0.Height));
 	}
-
-	// update(baseline: Buffer, current: Buffer, blendAlpha = 0.5) {
-	// 	if (!baseline || !current) {
-	// 		return;
-	// 	}
-
-	// 	this.baseline = baseline;
-	// 	this.current = current;
-
-	// 	const baselinePNG = PNG.sync.read(this.baseline);
-	// 	const currentPNG = PNG.sync.read(this.current);
-
-	// 	if (baselinePNG.width !== currentPNG.width || baselinePNG.height !== currentPNG.height) {
-	// 		return;
-	// 	}
-
-	// 	const { width, height } = baselinePNG;
-	// 	const diffPNG = new PNG({ width, height });
-
-	// 	pixelmatch(baselinePNG.data, currentPNG.data, diffPNG.data, width, height, { threshold: 0, includeAA: true, alpha: blendAlpha });
-	// 	const diffBuffer = PNG.sync.write(diffPNG);
-
-	// 	// fs.writeFileSync("diff.png", diffBuffer);
-	// 	const codec = this.app.GetImageCodec();
-	// 	this.view.updateRawImage(codec.Open(ResourceSource.FromBuffer(diffBuffer)));
-	// 	this.pager.SetContentSize(new Vec2(width, height));
-	// }
 
 	setZoom(zoom: number) {
 		this.pager.SetContentSize(new Vec2(this.view.width * zoom, this.view.height * zoom));
