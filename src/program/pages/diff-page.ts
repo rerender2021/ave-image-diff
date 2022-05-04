@@ -1,4 +1,4 @@
-import { AlignType, IControl, MessagePointer, Pager, PointerButton, ResourceSource, TextBox, Vec2 } from "ave-ui";
+import { AlignType, IControl, KbKey, MessagePointer, Pager, PointerButton, ResourceSource, TextBox, Vec2 } from "ave-ui";
 import { autorun } from "mobx";
 import * as Color from "color";
 import { GridLayout, ImageView, Page, ZoomView } from "../../components";
@@ -92,10 +92,22 @@ export class DiffPage extends Page {
 
 		this.update();
 		this.watch();
+		this.onHotKey();
 
 		//
 		const container = this.onCreateLayout();
 		return container;
+	}
+
+	onHotKey() {
+		const { window } = this;
+		const hkSpace = window.HotkeyRegister(KbKey.Space, 0);
+		window.OnWindowHotkey((sender, nId, key, n) => {
+			switch (nId) {
+				case hkSpace:
+					state.setLockColor(!state.lockColor);
+			}
+		});
 	}
 
 	onCreateLayout() {
@@ -224,6 +236,10 @@ export class DiffPage extends Page {
 	}
 
 	onPointerMove(mp: MessagePointer) {
+		if (state.lockColor) {
+			return;
+		}
+
 		if (this.dragMoving) {
 			const vPos = this.window.GetPlatform().PointerGetPosition();
 			const vNewScroll = this.dragStartScrollPos.Add(vPos.Sub(this.dragStartPointerPos));
