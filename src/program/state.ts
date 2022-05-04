@@ -1,5 +1,11 @@
 import { Vec2, Vec4 } from "ave-ui";
 import { makeObservable, observable, action } from "mobx";
+import { assetPath } from "../utils";
+
+export enum MiniViewSelection {
+	Baseline = 0,
+	Current = 1,
+}
 
 export class ProgramState {
 	blink: boolean;
@@ -12,6 +18,10 @@ export class ProgramState {
 		current: Vec4;
 	};
 	lockColor: boolean;
+	baselineFile: string;
+	currentFile: string;
+	currentMiniView: MiniViewSelection;
+	miniViewUpdateKey: number;
 
 	constructor() {
 		this.blink = false;
@@ -24,6 +34,10 @@ export class ProgramState {
 			current: new Vec4(0, 0, 0, 0),
 		};
 		this.lockColor = false;
+		this.baselineFile = assetPath("map-baseline.png");
+		this.currentFile = assetPath("map-current.png");
+		this.currentMiniView = MiniViewSelection.Baseline;
+		this.miniViewUpdateKey = Date.now();
 
 		makeObservable(this, {
 			blink: observable,
@@ -46,7 +60,35 @@ export class ProgramState {
 
 			lockColor: observable,
 			setLockColor: action,
+
+			baselineFile: observable,
+			setBaselineFile: action,
+
+			currentFile: observable,
+			setCurrentFile: action,
+
+			currentMiniView: observable,
+			setCurrentMiniView: action,
+
+			miniViewUpdateKey: observable,
+			setMiniViewUpdateKey: action
 		});
+	}
+
+	setMiniViewUpdateKey(key: number) {
+		this.miniViewUpdateKey = key;
+	}
+
+	setCurrentMiniView(selection: MiniViewSelection) {
+		this.currentMiniView = selection;
+	}
+
+	setBaselineFile(file: string) {
+		this.baselineFile = file;
+	}
+
+	setCurrentFile(file: string) {
+		this.currentFile = file;
 	}
 
 	setLockColor(lock: boolean) {

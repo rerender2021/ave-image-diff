@@ -1,10 +1,9 @@
-import { AlignType, IControl, KbKey, MessagePointer, Pager, PointerButton, ResourceSource, TextBox, Vec2 } from "ave-ui";
+import { AlignType, DragDropImage, DropBehavior, IControl, KbKey, MessagePointer, Pager, PointerButton, ResourceSource, TextBox, Vec2 } from "ave-ui";
 import { autorun } from "mobx";
 import * as Color from "color";
 import { GridLayout, ImageView, Page, ZoomView } from "../../components";
-import { assetBuffer } from "../../utils";
 import { BlinkDiffView, NormalDiffView } from "../components";
-import { state } from "../state";
+import { MiniViewSelection, state } from "../state";
 
 export class DiffPage extends Page {
 	baselinePager: Pager;
@@ -56,6 +55,32 @@ export class DiffPage extends Page {
 		this.baselinePager = createPager(this.baselineImage.control);
 		this.currentPager = createPager(this.currentImage.control);
 
+		[this.baselinePager, this.currentPager].forEach((pager) => {
+			pager.OnDragMove((sender, dc) => {
+				if (1 == dc.FileGetCount() && ["png", "jpg", "jpeg"].some((extension) => dc.FileGet()[0].toLowerCase().endsWith(extension))) {
+					dc.SetDropTip(DragDropImage.Copy, "Open this file");
+					dc.SetDropBehavior(DropBehavior.Copy);
+				}
+			});
+		});
+
+		this.baselinePager.OnDragDrop((sender, dc) => {
+			const file = dc.FileGet()[0];
+			state.setBaselineFile(file);
+			// only update mini view when current selection is the one you drop to
+			if(state.currentMiniView === MiniViewSelection.Baseline) {
+				state.setMiniViewUpdateKey(Date.now());
+			}
+		});
+
+		this.currentPager.OnDragDrop((sender, dc) => {
+			const file = dc.FileGet()[0];
+			state.setCurrentFile(file);
+			if(state.currentMiniView === MiniViewSelection.Current) {
+				state.setMiniViewUpdateKey(Date.now());
+			}
+		});
+
 		//
 		this.normalDiffView = new NormalDiffView(window);
 		this.blinkDiffView = new BlinkDiffView(window, this.app);
@@ -90,13 +115,36 @@ export class DiffPage extends Page {
 		this.baselineHexText = createText("Hex:");
 		this.currentHexText = createText("Hex:");
 
-		this.update();
+		this.init();
 		this.watch();
 		this.onHotKey();
+		this.onWindowDragDrop();
 
 		//
 		const container = this.onCreateLayout();
 		return container;
+	}
+
+	onWindowDragDrop() {
+		this.window.OnDragMove((sender, dc) => {
+			if (2 == dc.FileGetCount()) {
+				const [baseline, current] = dc.FileGet();
+				const isValid = (file: string) => ["png", "jpg", "jpeg"].some((extension) => file.toLowerCase().endsWith(extension));
+				if (isValid(baseline) && isValid(current)) {
+					dc.SetDropTip(DragDropImage.Copy, "Open these files");
+					dc.SetDropBehavior(DropBehavior.Copy);
+				}
+			}
+		});
+
+		this.window.OnDragDrop((sender, dc) => {
+			const [baseline, current] = dc.FileGet();
+			state.setBaselineFile(baseline);
+			state.setCurrentFile(current);
+
+			// always update miniview when drop 2 files
+			state.setMiniViewUpdateKey(Date.now());
+		});
 	}
 
 	onHotKey() {
@@ -167,7 +215,21 @@ export class DiffPage extends Page {
 		return container;
 	}
 
+	init() {
+		this.baselineSource = ResourceSource.FromPackedFile(state.baselineFile);
+		this.currentSource = ResourceSource.FromPackedFile(state.currentFile);
+		this.update();
+	}
+
 	watch() {
+		autorun(() => {
+			const pixelSize = state.zoom;
+			const resizedSize = new Vec2(this.baselineImage.width * pixelSize, this.baselineImage.height * pixelSize);
+			this.baselinePager.SetContentSize(resizedSize);
+			this.currentPager.SetContentSize(resizedSize);
+			this.normalDiffView.setZoom(pixelSize);
+		});
+
 		autorun(() => {
 			if (state.blink) {
 				this.blinkDiffView.show();
@@ -191,34 +253,36 @@ export class DiffPage extends Page {
 			this.baselineHexText.SetText(`Hex: ${Color({ r: baseline.r, g: baseline.g, b: baseline.b }).hex()}`);
 			this.currentHexText.SetText(`Hex: ${Color({ r: current.r, g: current.g, b: current.b }).hex()}`);
 		});
+
+		autorun(() => {
+			if (!state.baselineFile) {
+				return;
+			}
+			this.baselineSource = ResourceSource.FromFilePath(state.baselineFile);
+			this.update();
+		});
+
+		autorun(() => {
+			if (!state.currentFile) {
+				return;
+			}
+			this.currentSource = ResourceSource.FromFilePath(state.currentFile);
+			this.update();
+		});
 	}
 
 	update() {
 		const codec = this.app.GetImageCodec();
-
-		let baselineBuffer = assetBuffer("map-baseline.png");
-		const currentBuffer = assetBuffer("map-current.png");
-
-		this.baselineSource = ResourceSource.FromBuffer(baselineBuffer);
 		this.baselineImage.updateRawImage(codec.Open(this.baselineSource));
-
-		this.currentSource = ResourceSource.FromBuffer(currentBuffer);
 		this.currentImage.updateRawImage(codec.Open(this.currentSource));
 
-		//
+		this.baselinePager.SetContentSize(new Vec2(this.baselineImage.width, this.baselineImage.height));
+		this.currentPager.SetContentSize(new Vec2(this.currentImage.width, this.currentImage.height));
+
 		this.normalDiffView.update(this.baselineImage.data, this.currentImage.data);
 
-		//
 		this.baselineZoomView.track({ image: this.baselineImage.native });
 		this.currentZoomView.track({ image: this.currentImage.native });
-
-		autorun(() => {
-			const pixelSize = state.zoom;
-			const resizedSize = new Vec2(this.baselineImage.width * pixelSize, this.baselineImage.height * pixelSize);
-			this.baselinePager.SetContentSize(resizedSize);
-			this.currentPager.SetContentSize(resizedSize);
-			this.normalDiffView.setZoom(pixelSize);
-		});
 	}
 
 	onPointerPress(mp: MessagePointer) {
