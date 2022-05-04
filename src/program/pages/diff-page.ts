@@ -111,10 +111,30 @@ export class DiffPage extends Page {
 		this.init();
 		this.watch();
 		this.onHotKey();
+		this.onDragDrop();
 
 		//
 		const container = this.onCreateLayout();
 		return container;
+	}
+	
+	onDragDrop() {
+		this.window.OnDragMove((sender, dc) => {
+				if (2 == dc.FileGetCount()) {
+				const [baseline, current] = dc.FileGet();
+				const isValid = (file: string) => ["png", "jpg", "jpeg"].some((extension) => file.toLowerCase().endsWith(extension));
+				if (isValid(baseline) && isValid(current)) {
+					dc.SetDropTip(DragDropImage.Copy, "Open these files");
+					dc.SetDropBehavior(DropBehavior.Copy);
+				}
+			}
+		});
+
+		this.window.OnDragDrop((sender, dc) => {
+			const [baseline, current] = dc.FileGet();
+			state.setBaselineFile(baseline);
+			state.setCurrentFile(current);
+		});
 	}
 
 	onHotKey() {
