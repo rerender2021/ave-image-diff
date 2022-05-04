@@ -3,7 +3,7 @@ import { autorun } from "mobx";
 import * as Color from "color";
 import { GridLayout, ImageView, Page, ZoomView } from "../../components";
 import { BlinkDiffView, NormalDiffView } from "../components";
-import { state } from "../state";
+import { MiniViewSelection, state } from "../state";
 
 export class DiffPage extends Page {
 	baselinePager: Pager;
@@ -67,11 +67,18 @@ export class DiffPage extends Page {
 		this.baselinePager.OnDragDrop((sender, dc) => {
 			const file = dc.FileGet()[0];
 			state.setBaselineFile(file);
+			// only update mini view when current selection is the one you drop to
+			if(state.currentMiniView === MiniViewSelection.Baseline) {
+				state.setMiniViewUpdateKey(Date.now());
+			}
 		});
 
 		this.currentPager.OnDragDrop((sender, dc) => {
 			const file = dc.FileGet()[0];
 			state.setCurrentFile(file);
+			if(state.currentMiniView === MiniViewSelection.Current) {
+				state.setMiniViewUpdateKey(Date.now());
+			}
 		});
 
 		//
@@ -111,14 +118,14 @@ export class DiffPage extends Page {
 		this.init();
 		this.watch();
 		this.onHotKey();
-		this.onDragDrop();
+		this.onWindowDragDrop();
 
 		//
 		const container = this.onCreateLayout();
 		return container;
 	}
 
-	onDragDrop() {
+	onWindowDragDrop() {
 		this.window.OnDragMove((sender, dc) => {
 			if (2 == dc.FileGetCount()) {
 				const [baseline, current] = dc.FileGet();
@@ -134,6 +141,9 @@ export class DiffPage extends Page {
 			const [baseline, current] = dc.FileGet();
 			state.setBaselineFile(baseline);
 			state.setCurrentFile(current);
+
+			// always update miniview when drop 2 files
+			state.setMiniViewUpdateKey(Date.now());
 		});
 	}
 

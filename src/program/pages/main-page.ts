@@ -91,12 +91,24 @@ export class MainPage extends Page {
 
 	watch() {
 		autorun(() => {
-			if (state.currentMiniView === MiniViewSelection.Baseline) {
-				this.track(this.diffPage.baselineImage);
-			} else if (state.currentMiniView === MiniViewSelection.Current) {
-				this.track(this.diffPage.currentImage);
+			// update when currentMiniView changes
+			this.update();
+		});
+
+		autorun(() => {
+			// update when miniViewUpdateKey changes
+			if (state.miniViewUpdateKey) {
+				this.update();
 			}
 		});
+	}
+
+	update() {
+		if (state.currentMiniView === MiniViewSelection.Baseline) {
+			this.track(this.diffPage.baselineImage);
+		} else if (state.currentMiniView === MiniViewSelection.Current) {
+			this.track(this.diffPage.currentImage);
+		}
 	}
 
 	track(image: ImageView) {

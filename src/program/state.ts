@@ -4,7 +4,7 @@ import { assetPath } from "../utils";
 
 export enum MiniViewSelection {
 	Baseline = 0,
-	Current = 1
+	Current = 1,
 }
 
 export class ProgramState {
@@ -21,6 +21,7 @@ export class ProgramState {
 	baselineFile: string;
 	currentFile: string;
 	currentMiniView: MiniViewSelection;
+	miniViewUpdateKey: number;
 
 	constructor() {
 		this.blink = false;
@@ -36,6 +37,7 @@ export class ProgramState {
 		this.baselineFile = assetPath("map-baseline.png");
 		this.currentFile = assetPath("map-current.png");
 		this.currentMiniView = MiniViewSelection.Baseline;
+		this.miniViewUpdateKey = Date.now();
 
 		makeObservable(this, {
 			blink: observable,
@@ -67,7 +69,14 @@ export class ProgramState {
 
 			currentMiniView: observable,
 			setCurrentMiniView: action,
+
+			miniViewUpdateKey: observable,
+			setMiniViewUpdateKey: action
 		});
+	}
+
+	setMiniViewUpdateKey(key: number) {
+		this.miniViewUpdateKey = key;
 	}
 
 	setCurrentMiniView(selection: MiniViewSelection) {
