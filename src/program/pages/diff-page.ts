@@ -246,7 +246,11 @@ export class DiffPage extends Page {
 		this.baselineImage.updateRawImage(codec.Open(this.baselineSource));
 		this.currentImage.updateRawImage(codec.Open(this.currentSource));
 
+		this.baselinePager.SetContentSize(new Vec2(this.baselineImage.width, this.baselineImage.height));
+		this.currentPager.SetContentSize(new Vec2(this.currentImage.width, this.currentImage.height));
+
 		this.normalDiffView.update(this.baselineImage.data, this.currentImage.data);
+
 		this.baselineZoomView.track({ image: this.baselineImage.native });
 		this.currentZoomView.track({ image: this.currentImage.native });
 	}
