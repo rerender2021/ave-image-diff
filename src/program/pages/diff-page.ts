@@ -117,10 +117,10 @@ export class DiffPage extends Page {
 		const container = this.onCreateLayout();
 		return container;
 	}
-	
+
 	onDragDrop() {
 		this.window.OnDragMove((sender, dc) => {
-				if (2 == dc.FileGetCount()) {
+			if (2 == dc.FileGetCount()) {
 				const [baseline, current] = dc.FileGet();
 				const isValid = (file: string) => ["png", "jpg", "jpeg"].some((extension) => file.toLowerCase().endsWith(extension));
 				if (isValid(baseline) && isValid(current)) {

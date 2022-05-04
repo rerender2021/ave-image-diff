@@ -1,6 +1,7 @@
 import { AlignType, App, AveImage, Pager, ResourceSource, Window } from "ave-ui";
 import { ImageView, Component } from "../../components";
-import { assetBuffer } from "../../utils";
+import { readAsBuffer } from "../../utils";
+import { state } from "../state";
 
 export class BlinkDiffView extends Component {
 	private pager: Pager;
@@ -43,8 +44,8 @@ export class BlinkDiffView extends Component {
 	update() {
 		const codec = this.app.GetImageCodec();
 
-		const baselineBuffer = assetBuffer("map-baseline.png");
-		const currentBuffer = assetBuffer("map-current.png");
+		const baselineBuffer = readAsBuffer(state.baselineFile);
+		const currentBuffer = readAsBuffer(state.currentFile);
 
 		this.baseline = codec.Open(ResourceSource.FromBuffer(baselineBuffer));
 		this.current = codec.Open(ResourceSource.FromBuffer(currentBuffer));

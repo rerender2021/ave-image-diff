@@ -2,6 +2,11 @@ import { Vec2, Vec4 } from "ave-ui";
 import { makeObservable, observable, action } from "mobx";
 import { assetPath } from "../utils";
 
+export enum MiniViewSelection {
+	Baseline = 0,
+	Current = 1
+}
+
 export class ProgramState {
 	blink: boolean;
 	threshold: number;
@@ -15,6 +20,7 @@ export class ProgramState {
 	lockColor: boolean;
 	baselineFile: string;
 	currentFile: string;
+	currentMiniView: MiniViewSelection;
 
 	constructor() {
 		this.blink = false;
@@ -29,6 +35,7 @@ export class ProgramState {
 		this.lockColor = false;
 		this.baselineFile = assetPath("map-baseline.png");
 		this.currentFile = assetPath("map-current.png");
+		this.currentMiniView = MiniViewSelection.Baseline;
 
 		makeObservable(this, {
 			blink: observable,
@@ -57,7 +64,14 @@ export class ProgramState {
 
 			currentFile: observable,
 			setCurrentFile: action,
+
+			currentMiniView: observable,
+			setCurrentMiniView: action,
 		});
+	}
+
+	setCurrentMiniView(selection: MiniViewSelection) {
+		this.currentMiniView = selection;
 	}
 
 	setBaselineFile(file: string) {

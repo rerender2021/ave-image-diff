@@ -1,6 +1,7 @@
 import { CheckBox, CheckValue, ComboBox, TextBox, TrackBar } from "ave-ui";
+import { autorun } from "mobx";
 import { GridLayout, ImageView, MiniView, Page } from "../../components";
-import { state } from "../state";
+import { MiniViewSelection, state } from "../state";
 import { DiffPage } from "./diff-page";
 
 export class MainPage extends Page {
@@ -75,19 +76,27 @@ export class MainPage extends Page {
 		this.miniViewSwitch.Select(0);
 		this.miniViewSwitch.OnSelectionChange((comboBox: ComboBox) => {
 			const i = comboBox.GetSelection();
-			if (i === 0) {
-				this.track(this.diffPage.baselineImage);
-			} else if (i === 1) {
-				this.track(this.diffPage.currentImage);
-			}
+			state.setCurrentMiniView(i);
 		});
 
 		//
 		this.diffPage = new DiffPage(window, this.app);
 		this.track(this.diffPage.baselineImage);
 
+		this.watch();
+
 		const container = this.onCreateLayout();
 		return container;
+	}
+
+	watch() {
+		autorun(() => {
+			if (state.currentMiniView === MiniViewSelection.Baseline) {
+				this.track(this.diffPage.baselineImage);
+			} else if (state.currentMiniView === MiniViewSelection.Current) {
+				this.track(this.diffPage.currentImage);
+			}
+		});
 	}
 
 	track(image: ImageView) {
