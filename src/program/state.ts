@@ -11,6 +11,7 @@ export class ProgramState {
 		baseline: Vec4;
 		current: Vec4;
 	};
+	lockColor: boolean;
 
 	constructor() {
 		this.blink = false;
@@ -22,6 +23,7 @@ export class ProgramState {
 			baseline: new Vec4(0, 0, 0, 0),
 			current: new Vec4(0, 0, 0, 0),
 		};
+		this.lockColor = false;
 
 		makeObservable(this, {
 			blink: observable,
@@ -41,7 +43,14 @@ export class ProgramState {
 
 			pixelColor: observable,
 			setPixelColor: action,
+
+			lockColor: observable,
+			setLockColor: action,
 		});
+	}
+
+	setLockColor(lock: boolean) {
+		this.lockColor = lock;
 	}
 
 	setPixelColor(color: { baseline: Vec4; current: Vec4 }) {
