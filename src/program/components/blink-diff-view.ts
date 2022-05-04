@@ -1,4 +1,5 @@
-import { AlignType, App, AveImage, Pager, ResourceSource, Window } from "ave-ui";
+import { AlignType, App, AveImage, Pager, ResourceSource, Vec2, Window } from "ave-ui";
+import { autorun } from "mobx";
 import { ImageView, Component } from "../../components";
 import { readAsBuffer } from "../../utils";
 import { state } from "../state";
@@ -39,18 +40,21 @@ export class BlinkDiffView extends Component {
 		this.pager.SetContentVerticalAlign(AlignType.Center);
 
 		this.update();
+		this.watch();
 	}
 
 	update() {
 		const codec = this.app.GetImageCodec();
-
-		const baselineBuffer = readAsBuffer(state.baselineFile);
-		const currentBuffer = readAsBuffer(state.currentFile);
-
-		this.baseline = codec.Open(ResourceSource.FromBuffer(baselineBuffer));
-		this.current = codec.Open(ResourceSource.FromBuffer(currentBuffer));
-
+		this.baseline = codec.Open(ResourceSource.FromBuffer(readAsBuffer(state.baselineFile)));
+		this.current = codec.Open(ResourceSource.FromBuffer(readAsBuffer(state.currentFile)));
 		this.view.updateRawImage(this.baseline);
+		this.pager.SetContentSize(new Vec2(this.view.width, this.view.height));
+	}
+
+	watch() {
+		autorun(() => {
+			this.update();
+		});
 	}
 
 	blink() {
