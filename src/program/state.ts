@@ -1,5 +1,6 @@
 import { Vec2, Vec4 } from "ave-ui";
 import { makeObservable, observable, action } from "mobx";
+import { assetPath } from "../utils";
 
 export class ProgramState {
 	blink: boolean;
@@ -12,6 +13,8 @@ export class ProgramState {
 		current: Vec4;
 	};
 	lockColor: boolean;
+	baselineFile: string;
+	currentFile: string;
 
 	constructor() {
 		this.blink = false;
@@ -24,6 +27,8 @@ export class ProgramState {
 			current: new Vec4(0, 0, 0, 0),
 		};
 		this.lockColor = false;
+		this.baselineFile = assetPath("map-baseline.png");
+		this.currentFile = assetPath("map-current.png");
 
 		makeObservable(this, {
 			blink: observable,
@@ -46,7 +51,21 @@ export class ProgramState {
 
 			lockColor: observable,
 			setLockColor: action,
+
+			baselineFile: observable,
+			setBaselineFile: action,
+
+			currentFile: observable,
+			setCurrentFile: action,
 		});
+	}
+
+	setBaselineFile(file: string) {
+		this.baselineFile = file;
+	}
+
+	setCurrentFile(file: string) {
+		this.currentFile = file;
 	}
 
 	setLockColor(lock: boolean) {
