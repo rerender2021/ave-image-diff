@@ -148,31 +148,15 @@ export class Content extends Area {
 				current: { x: 3, y: 1 },
 				diff: { x: 1, y: 3 },
 				zoom: { x: 3, y: 3 },
-				control: { x: 5, y: 1 },
 			},
 		};
 		const container = createGridLayout(window, containerLayout);
-
-		const zoomLayout = {
-			rows: "1 192dpx 4dpx 16dpx 4dpx 16dpx 4dpx 16dpx 1",
-			columns: "1 192dpx 16dpx 192dpx 1",
-			areas: {
-				baseline: { x: 1, y: 1 },
-				baselinePosText: { x: 1, y: 3 },
-				baselineColorText: { x: 1, y: 5 },
-				baselineHexText: { x: 1, y: 7 },
-				current: { x: 3, y: 1 },
-				currentPosText: { x: 3, y: 3 },
-				currentColorText: { x: 3, y: 5 },
-				currentHexText: { x: 3, y: 7 },
-			},
-		};
 
 		container.addControl(this.baselinePager, container.areas.baseline);
 		container.addControl(this.currentPager, container.areas.current);
 		container.addControl(this.normalDiff.container, container.areas.diff);
 		container.addControl(this.blinkDiff.contrainer, container.areas.diff);
-		container.addControl(this.zoomArea.control, container.areas.diff);
+		container.addControl(this.zoomArea.control, container.areas.zoom);
 
 		return container;
 	}
