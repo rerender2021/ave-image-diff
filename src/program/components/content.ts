@@ -1,11 +1,11 @@
-import { Window, AlignType, DragDropImage, DropBehavior, IControl, KbKey, MessagePointer, Pager, PointerButton, ResourceSource, TextBox, Vec2 } from "ave-ui";
+import { Window, AlignType, DragDropImage, DropBehavior, IControl, KbKey, MessagePointer, Pager, PointerButton, ResourceSource, Vec2 } from "ave-ui";
 import { autorun } from "mobx";
-import * as Color from "color";
-import { Area, createGridLayout, GridLayout, ImageView, ZoomView } from "../../components";
+import { Area, createGridLayout, GridLayout, ImageView } from "../../components";
 import { BlinkDiff } from "./blink-diff";
 import { NormalDiff } from "./normal-diff";
 import { MiniViewSelection, state } from "../state";
 import { getApp } from "../utils";
+import { ZoomArea } from "./zoom";
 
 export class Content extends Area {
 	baselinePager: Pager;
@@ -18,16 +18,7 @@ export class Content extends Area {
 
 	normalDiff: NormalDiff;
 	private blinkDiff: BlinkDiff;
-
-	private baselineZoomView: ZoomView;
-	private baselinePosText: TextBox;
-	private baselineColorText: TextBox;
-	private baselineHexText: TextBox;
-
-	private currentZoomView: ZoomView;
-	private currentPosText: TextBox;
-	private currentColorText: TextBox;
-	private currentHexText: TextBox;
+	private zoomArea: ZoomArea;
 
 	private dragMoving: boolean = false;
 	private dragStartScrollPos: Vec2 = Vec2.Zero;
@@ -43,12 +34,9 @@ export class Content extends Area {
 		const { window } = this;
 
 		//
-		this.baselineZoomView = new ZoomView(window);
-		this.currentZoomView = new ZoomView(window);
-
-		//
 		this.baselineImage = new ImageView(window);
 		this.currentImage = new ImageView(window);
+		this.zoomArea = new ZoomArea(window, this).create();
 
 		const createPager = (content: IControl) => {
 			const pager = new Pager(window);
@@ -104,22 +92,6 @@ export class Content extends Area {
 		});
 
 		//
-		const createText = (s: string): TextBox => {
-			const txt = new TextBox(window);
-			txt.SetReadOnly(true);
-			txt.SetBorder(false);
-			txt.SetText(s);
-			return txt;
-		};
-
-		this.baselinePosText = createText("Baseline Position:");
-		this.currentPosText = createText("Current Position:");
-
-		this.baselineColorText = createText("RGBA:");
-		this.currentColorText = createText("RGBA:");
-
-		this.baselineHexText = createText("Hex:");
-		this.currentHexText = createText("Hex:");
 
 		this.init();
 		this.watch();
@@ -196,27 +168,11 @@ export class Content extends Area {
 			},
 		};
 
-		const zoomGrid = createGridLayout(window, zoomLayout);
-
 		container.addControl(this.baselinePager, container.areas.baseline);
 		container.addControl(this.currentPager, container.areas.current);
 		container.addControl(this.normalDiff.container, container.areas.diff);
 		container.addControl(this.blinkDiff.contrainer, container.areas.diff);
-
-		//
-		container.addControl(zoomGrid.control, container.areas.zoom);
-		zoomGrid.addControl(this.baselineZoomView.control, zoomGrid.areas.baseline);
-		zoomGrid.addControl(this.currentZoomView.control, zoomGrid.areas.current);
-
-		//
-		zoomGrid.addControl(this.baselinePosText, zoomGrid.areas.baselinePosText);
-		zoomGrid.addControl(this.currentPosText, zoomGrid.areas.currentPosText);
-
-		zoomGrid.addControl(this.baselineColorText, zoomGrid.areas.baselineColorText);
-		zoomGrid.addControl(this.currentColorText, zoomGrid.areas.currentColorText);
-
-		zoomGrid.addControl(this.baselineHexText, zoomGrid.areas.baselineHexText);
-		zoomGrid.addControl(this.currentHexText, zoomGrid.areas.currentHexText);
+		container.addControl(this.zoomArea.control, container.areas.diff);
 
 		return container;
 	}
@@ -247,20 +203,6 @@ export class Content extends Area {
 		});
 
 		autorun(() => {
-			this.baselinePosText.SetText(`Baseline Position: ${state.pixelPos.x}, ${state.pixelPos.y}`);
-			this.currentPosText.SetText(`Current Position: ${state.pixelPos.x}, ${state.pixelPos.y}`);
-
-			const baseline = state.pixelColor.baseline;
-			const current = state.pixelColor.current;
-
-			this.baselineColorText.SetText(`RGBA: ${baseline.r}, ${baseline.g}, ${baseline.b}, ${baseline.a}`);
-			this.currentColorText.SetText(`RGBA: ${current.r}, ${current.g}, ${current.b}, ${current.a}`);
-
-			this.baselineHexText.SetText(`Hex: ${Color({ r: baseline.r, g: baseline.g, b: baseline.b }).hex()}`);
-			this.currentHexText.SetText(`Hex: ${Color({ r: current.r, g: current.g, b: current.b }).hex()}`);
-		});
-
-		autorun(() => {
 			if (!state.baselineFile) {
 				return;
 			}
@@ -286,9 +228,7 @@ export class Content extends Area {
 		this.currentPager.SetContentSize(new Vec2(this.currentImage.width, this.currentImage.height));
 
 		this.normalDiff.update(this.baselineImage.data, this.currentImage.data);
-
-		this.baselineZoomView.track({ image: this.baselineImage.native });
-		this.currentZoomView.track({ image: this.currentImage.native });
+		this.zoomArea.update(this.baselineImage.native, this.currentImage.native);
 	}
 
 	private onPointerPress(mp: MessagePointer) {
@@ -319,8 +259,7 @@ export class Content extends Area {
 			const vPos = mp.Position.Div(state.zoom);
 			vPos.x = Math.floor(vPos.x);
 			vPos.y = Math.floor(vPos.y);
-			this.baselineZoomView.updatePixelPos(vPos);
-			this.currentZoomView.updatePixelPos(vPos);
+			this.zoomArea.onPointerMove(vPos);
 			state.setPixelPos(vPos);
 			state.setPixelColor({
 				baseline: this.baselineImage.readPixel(vPos.x, vPos.y),

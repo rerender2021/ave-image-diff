@@ -1,5 +1,5 @@
 import { Component, ImageView } from "../../components";
-import { AlignType, AveImage, Pager, PixFormat, Vec2, Window, ImageData, AveLib, AveGetImageProcessor } from "ave-ui";
+import { AlignType, AveImage, Pager, PixFormat, Vec2, Window, ImageData, AveGetImageProcessor } from "ave-ui";
 import { state } from "../state";
 import { autorun } from "mobx";
 
