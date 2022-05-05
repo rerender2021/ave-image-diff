@@ -110,7 +110,7 @@ export class Sidebar extends Area {
 
 	private track(image: ImageView) {
 		this.miniView.track({
-			pager: [this.content.baselinePager, this.content.currentPager, this.content.normalDiff.container],
+			pager: [this.content.baselinePager, this.content.currentPager, this.content.normalDiff.container, this.content.blinkDiff.contrainer],
 			image: image.native,
 		});
 	}

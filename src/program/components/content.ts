@@ -17,7 +17,7 @@ export class Content extends Area {
 	private currentSource: ResourceSource;
 
 	normalDiff: NormalDiff;
-	private blinkDiff: BlinkDiff;
+	blinkDiff: BlinkDiff;
 	private zoomArea: ZoomArea;
 
 	private dragMoving: boolean = false;
@@ -174,6 +174,7 @@ export class Content extends Area {
 			this.baselinePager.SetContentSize(resizedSize);
 			this.currentPager.SetContentSize(resizedSize);
 			this.normalDiff.setZoom(pixelSize);
+			this.blinkDiff.setZoom(pixelSize);
 		});
 
 		autorun(() => {
