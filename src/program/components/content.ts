@@ -10,36 +10,36 @@ import { getApp } from "../utils";
 export class Content extends Area {
 	baselinePager: Pager;
 	baselineImage: ImageView;
-	baselineSource: ResourceSource;
+	private baselineSource: ResourceSource;
 
 	currentPager: Pager;
 	currentImage: ImageView;
-	currentSource: ResourceSource;
+	private currentSource: ResourceSource;
 
 	normalDiff: NormalDiff;
-	blinkDiff: BlinkDiff;
+	private blinkDiff: BlinkDiff;
 
-	baselineZoomView: ZoomView;
-	baselinePosText: TextBox;
-	baselineColorText: TextBox;
-	baselineHexText: TextBox;
+	private baselineZoomView: ZoomView;
+	private baselinePosText: TextBox;
+	private baselineColorText: TextBox;
+	private baselineHexText: TextBox;
 
-	currentZoomView: ZoomView;
-	currentPosText: TextBox;
-	currentColorText: TextBox;
-	currentHexText: TextBox;
+	private currentZoomView: ZoomView;
+	private currentPosText: TextBox;
+	private currentColorText: TextBox;
+	private currentHexText: TextBox;
 
-	dragMoving: boolean = false;
-	dragStartScrollPos: Vec2 = Vec2.Zero;
-	dragStartPointerPos: Vec2 = Vec2.Zero;
+	private dragMoving: boolean = false;
+	private dragStartScrollPos: Vec2 = Vec2.Zero;
+	private dragStartPointerPos: Vec2 = Vec2.Zero;
 
-	pager: Pager[];
+	private pagerList: Pager[];
 
 	constructor(window: Window) {
 		super(window);
 	}
 
-	onCreate(): GridLayout {
+	protected onCreate(): GridLayout {
 		const { window } = this;
 
 		//
@@ -97,9 +97,9 @@ export class Content extends Area {
 			each.control.OnPointerMove((sender, mp) => this.onPointerMove(mp));
 		});
 
-		this.pager = [this.baselinePager, this.currentPager, this.normalDiff.container, this.blinkDiff.contrainer];
+		this.pagerList = [this.baselinePager, this.currentPager, this.normalDiff.container, this.blinkDiff.contrainer];
 
-		this.pager.forEach((e) => {
+		this.pagerList.forEach((e) => {
 			e.OnScroll((sender) => this.onPagerScroll(sender));
 		});
 
@@ -131,7 +131,7 @@ export class Content extends Area {
 		return container;
 	}
 
-	onWindowDragDrop() {
+	private onWindowDragDrop() {
 		this.window.OnDragMove((sender, dc) => {
 			if (2 == dc.FileGetCount()) {
 				const [baseline, current] = dc.FileGet();
@@ -153,7 +153,7 @@ export class Content extends Area {
 		});
 	}
 
-	onHotKey() {
+	private onHotKey() {
 		const { window } = this;
 		const hkSpace = window.HotkeyRegister(KbKey.Space, 0);
 		window.OnWindowHotkey((sender, nId, key, n) => {
@@ -164,7 +164,7 @@ export class Content extends Area {
 		});
 	}
 
-	onCreateLayout() {
+	private onCreateLayout() {
 		const { window } = this;
 
 		//
@@ -221,13 +221,13 @@ export class Content extends Area {
 		return container;
 	}
 
-	init() {
+	private init() {
 		this.baselineSource = ResourceSource.FromPackedFile(state.baselineFile);
 		this.currentSource = ResourceSource.FromPackedFile(state.currentFile);
 		this.update();
 	}
 
-	watch() {
+	private watch() {
 		autorun(() => {
 			const pixelSize = state.zoom;
 			const resizedSize = new Vec2(this.baselineImage.width * pixelSize, this.baselineImage.height * pixelSize);
@@ -277,7 +277,7 @@ export class Content extends Area {
 		});
 	}
 
-	update() {
+	private update() {
 		const codec = getApp().GetImageCodec();
 		this.baselineImage.updateRawImage(codec.Open(this.baselineSource));
 		this.currentImage.updateRawImage(codec.Open(this.currentSource));
@@ -291,7 +291,7 @@ export class Content extends Area {
 		this.currentZoomView.track({ image: this.currentImage.native });
 	}
 
-	onPointerPress(mp: MessagePointer) {
+	private onPointerPress(mp: MessagePointer) {
 		if (PointerButton.First == mp.Button) {
 			this.dragMoving = true;
 			this.dragStartPointerPos = this.window.GetPlatform().PointerGetPosition();
@@ -299,13 +299,13 @@ export class Content extends Area {
 		}
 	}
 
-	onPointerRelease(mp: MessagePointer) {
+	private onPointerRelease(mp: MessagePointer) {
 		if (PointerButton.First == mp.Button) {
 			this.dragMoving = false;
 		}
 	}
 
-	onPointerMove(mp: MessagePointer) {
+	private onPointerMove(mp: MessagePointer) {
 		if (state.lockColor) {
 			return;
 		}
@@ -313,7 +313,7 @@ export class Content extends Area {
 		if (this.dragMoving) {
 			const vPos = this.window.GetPlatform().PointerGetPosition();
 			const vNewScroll = this.dragStartScrollPos.Add(vPos.Sub(this.dragStartPointerPos));
-			this.pager.forEach((e) => e.SetScrollPosition(vNewScroll, false));
+			this.pagerList.forEach((e) => e.SetScrollPosition(vNewScroll, false));
 			this.window.Update();
 		} else {
 			const vPos = mp.Position.Div(state.zoom);
@@ -329,9 +329,9 @@ export class Content extends Area {
 		}
 	}
 
-	onPagerScroll(sender: Pager) {
+	private onPagerScroll(sender: Pager) {
 		const vNewScroll = sender.GetScrollPosition();
-		this.pager.forEach((e) => {
+		this.pagerList.forEach((e) => {
 			if (sender != e) e.SetScrollPosition(vNewScroll, false);
 		});
 		this.window.Update();

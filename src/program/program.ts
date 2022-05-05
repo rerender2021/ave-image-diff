@@ -29,7 +29,7 @@ export class Program {
 
 	onCreateContent() {
 		this.window.OnCreateContent((window) => {
-			this.mainArea = new Main(window);
+			this.mainArea = new Main(window).create();
 			window.SetContent(this.mainArea.control);
 			return true;
 		});
