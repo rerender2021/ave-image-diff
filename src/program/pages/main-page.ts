@@ -1,10 +1,10 @@
 import { CheckBox, CheckValue, ComboBox, TextBox, TrackBar } from "ave-ui";
 import { autorun } from "mobx";
-import { GridLayout, ImageView, MiniView, Page } from "../../components";
+import { Area, GridLayout, ImageView, MiniView } from "../../components";
 import { MiniViewSelection, state } from "../state";
-import { DiffPage } from "./diff-page";
+import { Content } from "../components";
 
-export class MainPage extends Page {
+export class Main extends Area {
 	blinkCheckBox: CheckBox;
 	blinkText: TextBox;
 
@@ -21,7 +21,7 @@ export class MainPage extends Page {
 	miniViewText: TextBox;
 	miniViewSwitch: ComboBox;
 
-	diffPage: DiffPage;
+	content: Content;
 
 	onCreate(): GridLayout {
 		const { window } = this;
@@ -80,8 +80,8 @@ export class MainPage extends Page {
 		});
 
 		//
-		this.diffPage = new DiffPage(window, this.app);
-		this.track(this.diffPage.baselineImage);
+		this.content = new Content(window);
+		this.track(this.content.baselineImage);
 
 		this.watch();
 
@@ -105,15 +105,15 @@ export class MainPage extends Page {
 
 	update() {
 		if (state.currentMiniView === MiniViewSelection.Baseline) {
-			this.track(this.diffPage.baselineImage);
+			this.track(this.content.baselineImage);
 		} else if (state.currentMiniView === MiniViewSelection.Current) {
-			this.track(this.diffPage.currentImage);
+			this.track(this.content.currentImage);
 		}
 	}
 
 	track(image: ImageView) {
 		this.miniView.track({
-			pager: [this.diffPage.baselinePager, this.diffPage.currentPager, this.diffPage.normalDiff.container],
+			pager: [this.content.baselinePager, this.content.currentPager, this.content.normalDiff.container],
 			image: image.native,
 		});
 	}
@@ -126,7 +126,7 @@ export class MainPage extends Page {
 			rows: "1",
 			columns: "1 192dpx 32dpx",
 			areas: {
-				main: { x: 0, y: 0 },
+				content: { x: 0, y: 0 },
 				control: { x: 1, y: 0 },
 			},
 		};
@@ -151,7 +151,7 @@ export class MainPage extends Page {
 		};
 		const controlGrid = new GridLayout<keyof typeof controlLayout.areas>(window, controlLayout);
 
-		container.addControl(this.diffPage.control, container.areas.main);
+		container.addControl(this.content.control, container.areas.content);
 		container.addControl(controlGrid.control, container.areas.control);
 
 		controlGrid.addControl(this.blinkCheckBox, controlGrid.areas.blink);

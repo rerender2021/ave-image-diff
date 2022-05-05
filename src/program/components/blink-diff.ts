@@ -3,6 +3,7 @@ import { autorun } from "mobx";
 import { ImageView, Component } from "../../components";
 import { readAsBuffer } from "../../utils";
 import { state } from "../state";
+import { getApp } from "../utils";
 
 export class BlinkDiff extends Component {
 	private pager: Pager;
@@ -12,8 +13,6 @@ export class BlinkDiff extends Component {
 	private current: AveImage;
 	private view: ImageView;
 
-	private app: App;
-
 	get control() {
 		return this.view.control;
 	}
@@ -22,9 +21,8 @@ export class BlinkDiff extends Component {
 		return this.pager;
 	}
 
-	constructor(window: Window, app: App) {
+	constructor(window: Window) {
 		super(window);
-		this.app = app;
 		this.onCreate();
 	}
 
@@ -44,7 +42,7 @@ export class BlinkDiff extends Component {
 	}
 
 	update() {
-		const codec = this.app.GetImageCodec();
+		const codec = getApp().GetImageCodec();
 		this.baseline = codec.Open(ResourceSource.FromBuffer(readAsBuffer(state.baselineFile)));
 		this.current = codec.Open(ResourceSource.FromBuffer(readAsBuffer(state.currentFile)));
 		this.view.updateRawImage(this.baseline);

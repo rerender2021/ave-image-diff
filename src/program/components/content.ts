@@ -1,11 +1,13 @@
-import { AlignType, DragDropImage, DropBehavior, IControl, KbKey, MessagePointer, Pager, PointerButton, ResourceSource, TextBox, Vec2 } from "ave-ui";
+import { Window, AlignType, DragDropImage, DropBehavior, IControl, KbKey, MessagePointer, Pager, PointerButton, ResourceSource, TextBox, Vec2 } from "ave-ui";
 import { autorun } from "mobx";
 import * as Color from "color";
-import { GridLayout, ImageView, Page, ZoomView } from "../../components";
-import { BlinkDiff, NormalDiff } from "../components";
+import { Area, GridLayout, ImageView, ZoomView } from "../../components";
+import { BlinkDiff } from "./blink-diff";
+import { NormalDiff } from "./normal-diff";
 import { MiniViewSelection, state } from "../state";
+import { getApp } from "../utils";
 
-export class DiffPage extends Page {
+export class Content extends Area {
 	baselinePager: Pager;
 	baselineImage: ImageView;
 	baselineSource: ResourceSource;
@@ -32,6 +34,10 @@ export class DiffPage extends Page {
 	dragStartPointerPos: Vec2 = Vec2.Zero;
 
 	pager: Pager[];
+
+	constructor(window: Window) {
+		super(window);
+	}
 
 	onCreate(): GridLayout {
 		const { window } = this;
@@ -68,7 +74,7 @@ export class DiffPage extends Page {
 			const file = dc.FileGet()[0];
 			state.setBaselineFile(file);
 			// only update mini view when current selection is the one you drop to
-			if(state.currentMiniView === MiniViewSelection.Baseline) {
+			if (state.currentMiniView === MiniViewSelection.Baseline) {
 				state.setMiniViewUpdateKey(Date.now());
 			}
 		});
@@ -76,14 +82,14 @@ export class DiffPage extends Page {
 		this.currentPager.OnDragDrop((sender, dc) => {
 			const file = dc.FileGet()[0];
 			state.setCurrentFile(file);
-			if(state.currentMiniView === MiniViewSelection.Current) {
+			if (state.currentMiniView === MiniViewSelection.Current) {
 				state.setMiniViewUpdateKey(Date.now());
 			}
 		});
 
 		//
 		this.normalDiff = new NormalDiff(window);
-		this.blinkDiff = new BlinkDiff(window, this.app);
+		this.blinkDiff = new BlinkDiff(window);
 
 		[this.normalDiff, this.blinkDiff, this.baselineImage, this.currentImage].forEach((each) => {
 			each.control.OnPointerPress((sender, mp) => this.onPointerPress(mp));
@@ -272,7 +278,7 @@ export class DiffPage extends Page {
 	}
 
 	update() {
-		const codec = this.app.GetImageCodec();
+		const codec = getApp().GetImageCodec();
 		this.baselineImage.updateRawImage(codec.Open(this.baselineSource));
 		this.currentImage.updateRawImage(codec.Open(this.currentSource));
 
