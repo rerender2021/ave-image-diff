@@ -1,6 +1,6 @@
 import { CheckBox, CheckValue, ComboBox, TextBox, TrackBar, Window } from "ave-ui";
 import { autorun } from "mobx";
-import { Area, GridLayout, ImageView, MiniView } from "../../components";
+import { Area, createGridLayout, GridLayout, ImageView, MiniView } from "../../components";
 import { MiniViewSelection, state } from "../state";
 import { Content } from "./content";
 
@@ -135,7 +135,7 @@ export class Sidebar extends Area {
 				blink: { x: 1, y: 12 },
 			},
 		};
-		const container = new GridLayout<keyof typeof containerLayout.areas>(window, containerLayout);
+		const container = createGridLayout(window, containerLayout);
 
 		container.addControl(this.blinkCheckBox, containerLayout.areas.blink);
 		container.addControl(this.blinkText, containerLayout.areas.blinkText);

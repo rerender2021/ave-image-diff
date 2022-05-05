@@ -23,6 +23,10 @@ export type GridArea = {
 	yspan?: number;
 };
 
+export function createGridLayout<T extends IGridLayout>(window: Window, layout: T ) {
+	return new GridLayout<keyof T["areas"] & string>(window, layout);
+}
+
 export class GridLayout<AreaName extends string = string> extends Component {
 	private grid: Grid;
 	private layout: IGridLayout;

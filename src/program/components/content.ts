@@ -1,7 +1,7 @@
 import { Window, AlignType, DragDropImage, DropBehavior, IControl, KbKey, MessagePointer, Pager, PointerButton, ResourceSource, TextBox, Vec2 } from "ave-ui";
 import { autorun } from "mobx";
 import * as Color from "color";
-import { Area, GridLayout, ImageView, ZoomView } from "../../components";
+import { Area, createGridLayout, GridLayout, ImageView, ZoomView } from "../../components";
 import { BlinkDiff } from "./blink-diff";
 import { NormalDiff } from "./normal-diff";
 import { MiniViewSelection, state } from "../state";
@@ -179,7 +179,7 @@ export class Content extends Area {
 				control: { x: 5, y: 1 },
 			},
 		};
-		const container = new GridLayout<keyof typeof containerLayout.areas>(window, containerLayout);
+		const container = createGridLayout(window, containerLayout);
 
 		const zoomLayout = {
 			rows: "1 192dpx 4dpx 16dpx 4dpx 16dpx 4dpx 16dpx 1",
@@ -196,7 +196,7 @@ export class Content extends Area {
 			},
 		};
 
-		const zoomGrid = new GridLayout<keyof typeof zoomLayout.areas>(window, zoomLayout);
+		const zoomGrid = createGridLayout(window, zoomLayout);
 
 		container.addControl(this.baselinePager, container.areas.baseline);
 		container.addControl(this.currentPager, container.areas.current);

@@ -1,5 +1,4 @@
-import { Area, GridLayout } from "../../components";
-import { AreasOf } from "../utils";
+import { Area, createGridLayout, GridLayout } from "../../components";
 import { Content } from "./content";
 import { Sidebar } from "./sidebar";
 
@@ -29,7 +28,7 @@ export class Main extends Area {
 			},
 		};
 
-		const container = new GridLayout<AreasOf<typeof containerLayout>>(window, containerLayout);
+		const container = createGridLayout(window, containerLayout);
 		container.addControl(this.content.control, container.areas.content);
 		container.addControl(this.sidebar.control, container.areas.sidebar);
 
