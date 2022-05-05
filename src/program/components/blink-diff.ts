@@ -1,4 +1,4 @@
-import { AlignType, App, AveImage, Pager, ResourceSource, Vec2, Window } from "ave-ui";
+import { AlignType, AveImage, Pager, ResourceSource, Vec2, Window } from "ave-ui";
 import { autorun } from "mobx";
 import { ImageView, Component } from "../../components";
 import { readAsBuffer } from "../../utils";
@@ -67,6 +67,10 @@ export class BlinkDiff extends Component {
 		}, 500);
 	}
 
+	setZoom(zoom: number) {
+		this.pager.SetContentSize(new Vec2(this.view.width * zoom, this.view.height * zoom));
+	}
+	
 	show(): void {
 		this.pager.SetVisible(true);
 		this.blink();
