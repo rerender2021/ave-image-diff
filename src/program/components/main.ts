@@ -2,7 +2,7 @@ import { CheckBox, CheckValue, ComboBox, TextBox, TrackBar } from "ave-ui";
 import { autorun } from "mobx";
 import { Area, GridLayout, ImageView, MiniView } from "../../components";
 import { MiniViewSelection, state } from "../state";
-import { Content } from "../components";
+import { Content } from ".";
 
 export class Main extends Area {
 	blinkCheckBox: CheckBox;
