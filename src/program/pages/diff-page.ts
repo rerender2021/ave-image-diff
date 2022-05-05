@@ -2,7 +2,7 @@ import { AlignType, DragDropImage, DropBehavior, IControl, KbKey, MessagePointer
 import { autorun } from "mobx";
 import * as Color from "color";
 import { GridLayout, ImageView, Page, ZoomView } from "../../components";
-import { BlinkDiffView, NormalDiffView } from "../components";
+import { BlinkDiff, NormalDiff } from "../components";
 import { MiniViewSelection, state } from "../state";
 
 export class DiffPage extends Page {
@@ -14,8 +14,8 @@ export class DiffPage extends Page {
 	currentImage: ImageView;
 	currentSource: ResourceSource;
 
-	normalDiffView: NormalDiffView;
-	blinkDiffView: BlinkDiffView;
+	normalDiff: NormalDiff;
+	blinkDiff: BlinkDiff;
 
 	baselineZoomView: ZoomView;
 	baselinePosText: TextBox;
@@ -82,16 +82,16 @@ export class DiffPage extends Page {
 		});
 
 		//
-		this.normalDiffView = new NormalDiffView(window);
-		this.blinkDiffView = new BlinkDiffView(window, this.app);
+		this.normalDiff = new NormalDiff(window);
+		this.blinkDiff = new BlinkDiff(window, this.app);
 
-		[this.normalDiffView, this.blinkDiffView, this.baselineImage, this.currentImage].forEach((each) => {
+		[this.normalDiff, this.blinkDiff, this.baselineImage, this.currentImage].forEach((each) => {
 			each.control.OnPointerPress((sender, mp) => this.onPointerPress(mp));
 			each.control.OnPointerRelease((sender, mp) => this.onPointerRelease(mp));
 			each.control.OnPointerMove((sender, mp) => this.onPointerMove(mp));
 		});
 
-		this.pager = [this.baselinePager, this.currentPager, this.normalDiffView.container, this.blinkDiffView.contrainer];
+		this.pager = [this.baselinePager, this.currentPager, this.normalDiff.container, this.blinkDiff.contrainer];
 
 		this.pager.forEach((e) => {
 			e.OnScroll((sender) => this.onPagerScroll(sender));
@@ -194,8 +194,8 @@ export class DiffPage extends Page {
 
 		container.addControl(this.baselinePager, container.areas.baseline);
 		container.addControl(this.currentPager, container.areas.current);
-		container.addControl(this.normalDiffView.container, container.areas.diff);
-		container.addControl(this.blinkDiffView.contrainer, container.areas.diff);
+		container.addControl(this.normalDiff.container, container.areas.diff);
+		container.addControl(this.blinkDiff.contrainer, container.areas.diff);
 
 		//
 		container.addControl(zoomGrid.control, container.areas.zoom);
@@ -227,16 +227,16 @@ export class DiffPage extends Page {
 			const resizedSize = new Vec2(this.baselineImage.width * pixelSize, this.baselineImage.height * pixelSize);
 			this.baselinePager.SetContentSize(resizedSize);
 			this.currentPager.SetContentSize(resizedSize);
-			this.normalDiffView.setZoom(pixelSize);
+			this.normalDiff.setZoom(pixelSize);
 		});
 
 		autorun(() => {
 			if (state.blink) {
-				this.blinkDiffView.show();
-				this.normalDiffView.hide();
+				this.blinkDiff.show();
+				this.normalDiff.hide();
 			} else {
-				this.normalDiffView.show();
-				this.blinkDiffView.hide();
+				this.normalDiff.show();
+				this.blinkDiff.hide();
 			}
 		});
 
@@ -279,7 +279,7 @@ export class DiffPage extends Page {
 		this.baselinePager.SetContentSize(new Vec2(this.baselineImage.width, this.baselineImage.height));
 		this.currentPager.SetContentSize(new Vec2(this.currentImage.width, this.currentImage.height));
 
-		this.normalDiffView.update(this.baselineImage.data, this.currentImage.data);
+		this.normalDiff.update(this.baselineImage.data, this.currentImage.data);
 
 		this.baselineZoomView.track({ image: this.baselineImage.native });
 		this.currentZoomView.track({ image: this.currentImage.native });

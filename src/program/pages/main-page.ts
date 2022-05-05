@@ -113,7 +113,7 @@ export class MainPage extends Page {
 
 	track(image: ImageView) {
 		this.miniView.track({
-			pager: [this.diffPage.baselinePager, this.diffPage.currentPager, this.diffPage.normalDiffView.container],
+			pager: [this.diffPage.baselinePager, this.diffPage.currentPager, this.diffPage.normalDiff.container],
 			image: image.native,
 		});
 	}

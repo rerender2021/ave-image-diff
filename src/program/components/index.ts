@@ -1,2 +1,2 @@
-export * from "./blink-diff-view";
-export * from "./normal-diff-view";
+export * from "./blink-diff";
+export * from "./normal-diff";

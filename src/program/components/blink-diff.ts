@@ -4,7 +4,7 @@ import { ImageView, Component } from "../../components";
 import { readAsBuffer } from "../../utils";
 import { state } from "../state";
 
-export class BlinkDiffView extends Component {
+export class BlinkDiff extends Component {
 	private pager: Pager;
 	private timer: NodeJS.Timer;
 
