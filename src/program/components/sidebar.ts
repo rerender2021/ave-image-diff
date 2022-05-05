@@ -1,29 +1,34 @@
-import { CheckBox, CheckValue, ComboBox, TextBox, TrackBar } from "ave-ui";
+import { CheckBox, CheckValue, ComboBox, TextBox, TrackBar, Window } from "ave-ui";
 import { autorun } from "mobx";
-import { GridLayout, ImageView, MiniView, Page } from "../../components";
+import { Area, createGridLayout, GridLayout, ImageView, MiniView } from "../../components";
 import { MiniViewSelection, state } from "../state";
-import { DiffPage } from "./diff-page";
+import { Content } from "./content";
 
-export class MainPage extends Page {
-	blinkCheckBox: CheckBox;
-	blinkText: TextBox;
+export class Sidebar extends Area {
+	private miniView: MiniView;
+	private miniViewText: TextBox;
+	private miniViewSwitch: ComboBox;
 
-	thresholdScroll: TrackBar;
-	thresholdText: TextBox;
+	private thresholdScroll: TrackBar;
+	private thresholdText: TextBox;
 
-	blendAlphaScroll: TrackBar;
-	blendAlphaText: TextBox;
+	private blendAlphaScroll: TrackBar;
+	private blendAlphaText: TextBox;
 
-	zoomScroll: TrackBar;
-	zoomText: TextBox;
+	private zoomScroll: TrackBar;
+	private zoomText: TextBox;
 
-	miniView: MiniView;
-	miniViewText: TextBox;
-	miniViewSwitch: ComboBox;
+	private blinkCheckBox: CheckBox;
+	private blinkText: TextBox;
 
-	diffPage: DiffPage;
+	private content: Content;
 
-	onCreate(): GridLayout {
+	constructor(window: Window, content: Content) {
+		super(window);
+		this.content = content;
+	}
+
+	protected onCreate(): GridLayout {
 		const { window } = this;
 
 		//
@@ -80,59 +85,40 @@ export class MainPage extends Page {
 		});
 
 		//
-		this.diffPage = new DiffPage(window, this.app);
-		this.track(this.diffPage.baselineImage);
-
+		this.track(this.content.baselineImage);
 		this.watch();
 
 		const container = this.onCreateLayout();
 		return container;
 	}
 
-	watch() {
+	private watch() {
 		autorun(() => {
-			// update when currentMiniView changes
-			this.update();
-		});
-
-		autorun(() => {
-			// update when miniViewUpdateKey changes
 			if (state.miniViewUpdateKey) {
 				this.update();
 			}
 		});
 	}
 
-	update() {
+	private update() {
 		if (state.currentMiniView === MiniViewSelection.Baseline) {
-			this.track(this.diffPage.baselineImage);
+			this.track(this.content.baselineImage);
 		} else if (state.currentMiniView === MiniViewSelection.Current) {
-			this.track(this.diffPage.currentImage);
+			this.track(this.content.currentImage);
 		}
 	}
 
-	track(image: ImageView) {
+	private track(image: ImageView) {
 		this.miniView.track({
-			pager: [this.diffPage.baselinePager, this.diffPage.currentPager, this.diffPage.normalDiffView.container],
+			pager: [this.content.baselinePager, this.content.currentPager, this.content.normalDiff.container],
 			image: image.native,
 		});
 	}
 
-	onCreateLayout() {
+	private onCreateLayout() {
 		const { window } = this;
 
-		//
 		const containerLayout = {
-			rows: "1",
-			columns: "1 192dpx 32dpx",
-			areas: {
-				main: { x: 0, y: 0 },
-				control: { x: 1, y: 0 },
-			},
-		};
-		const container = new GridLayout<keyof typeof containerLayout.areas>(window, containerLayout);
-
-		const controlLayout = {
 			rows: "32dpx 128px 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 1",
 			columns: "1 1",
 			areas: {
@@ -149,26 +135,23 @@ export class MainPage extends Page {
 				blink: { x: 1, y: 12 },
 			},
 		};
-		const controlGrid = new GridLayout<keyof typeof controlLayout.areas>(window, controlLayout);
+		const container = createGridLayout(window, containerLayout);
 
-		container.addControl(this.diffPage.control, container.areas.main);
-		container.addControl(controlGrid.control, container.areas.control);
+		container.addControl(this.blinkCheckBox, containerLayout.areas.blink);
+		container.addControl(this.blinkText, containerLayout.areas.blinkText);
 
-		controlGrid.addControl(this.blinkCheckBox, controlGrid.areas.blink);
-		controlGrid.addControl(this.blinkText, controlGrid.areas.blinkText);
+		container.addControl(this.thresholdText, containerLayout.areas.thresholdText);
+		container.addControl(this.thresholdScroll, containerLayout.areas.threshold);
 
-		controlGrid.addControl(this.thresholdText, controlGrid.areas.thresholdText);
-		controlGrid.addControl(this.thresholdScroll, controlGrid.areas.threshold);
+		container.addControl(this.blendAlphaText, containerLayout.areas.blendAlphaText);
+		container.addControl(this.blendAlphaScroll, containerLayout.areas.blendAlpha);
 
-		controlGrid.addControl(this.blendAlphaText, controlGrid.areas.blendAlphaText);
-		controlGrid.addControl(this.blendAlphaScroll, controlGrid.areas.blendAlpha);
+		container.addControl(this.zoomText, containerLayout.areas.zoomText);
+		container.addControl(this.zoomScroll, containerLayout.areas.zoom);
 
-		controlGrid.addControl(this.zoomText, controlGrid.areas.zoomText);
-		controlGrid.addControl(this.zoomScroll, controlGrid.areas.zoom);
-
-		controlGrid.addControl(this.miniView.control, controlGrid.areas.miniView);
-		controlGrid.addControl(this.miniViewText, controlGrid.areas.miniViewText);
-		controlGrid.addControl(this.miniViewSwitch, controlGrid.areas.miniViewSwitch);
+		container.addControl(this.miniView.control, containerLayout.areas.miniView);
+		container.addControl(this.miniViewText, containerLayout.areas.miniViewText);
+		container.addControl(this.miniViewSwitch, containerLayout.areas.miniViewSwitch);
 
 		return container;
 	}

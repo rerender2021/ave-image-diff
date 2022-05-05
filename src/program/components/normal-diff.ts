@@ -1,9 +1,9 @@
 import { Component, ImageView } from "../../components";
-import { AlignType, AveImage, Pager, PixFormat, Vec2, Window, ImageData, AveLib, AveGetImageProcessor } from "ave-ui";
+import { AlignType, AveImage, Pager, PixFormat, Vec2, Window, ImageData, AveGetImageProcessor } from "ave-ui";
 import { state } from "../state";
 import { autorun } from "mobx";
 
-export class NormalDiffView extends Component {
+export class NormalDiff extends Component {
 	private view: ImageView;
 	private pager: Pager;
 	private baseline: AveImage;
@@ -37,7 +37,7 @@ export class NormalDiffView extends Component {
 		this.watch();
 	}
 
-	watch() {
+	private watch() {
 		autorun(() => {
 			this.update(this.baseline, this.current, state.threshold, state.blendAlpha);
 		});

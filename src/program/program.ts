@@ -1,14 +1,16 @@
 import { App, WindowCreation, Window, WindowFlag } from "ave-ui";
-import { MainPage } from "./pages";
+import { Main } from "./components";
+import { setApp } from "./utils";
 
 export class Program {
 	app: App;
 	window: Window;
 
-	mainPage: MainPage;
+	mainArea: Main;
 
 	constructor() {
 		this.app = new App();
+		setApp(this.app);
 
 		const cpWindow = new WindowCreation();
 		cpWindow.Title = "Image Diff";
@@ -27,8 +29,8 @@ export class Program {
 
 	onCreateContent() {
 		this.window.OnCreateContent((window) => {
-			this.mainPage = new MainPage(window, this.app);
-			window.SetContent(this.mainPage.control);
+			this.mainArea = new Main(window).create();
+			window.SetContent(this.mainArea.control);
 			return true;
 		});
 	}

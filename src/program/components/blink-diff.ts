@@ -3,16 +3,15 @@ import { autorun } from "mobx";
 import { ImageView, Component } from "../../components";
 import { readAsBuffer } from "../../utils";
 import { state } from "../state";
+import { getApp } from "../utils";
 
-export class BlinkDiffView extends Component {
+export class BlinkDiff extends Component {
 	private pager: Pager;
 	private timer: NodeJS.Timer;
 
 	private baseline: AveImage;
 	private current: AveImage;
 	private view: ImageView;
-
-	private app: App;
 
 	get control() {
 		return this.view.control;
@@ -22,13 +21,12 @@ export class BlinkDiffView extends Component {
 		return this.pager;
 	}
 
-	constructor(window: Window, app: App) {
+	constructor(window: Window) {
 		super(window);
-		this.app = app;
 		this.onCreate();
 	}
 
-	onCreate() {
+	private onCreate() {
 		const { window } = this;
 
 		//
@@ -44,20 +42,20 @@ export class BlinkDiffView extends Component {
 	}
 
 	update() {
-		const codec = this.app.GetImageCodec();
+		const codec = getApp().GetImageCodec();
 		this.baseline = codec.Open(ResourceSource.FromBuffer(readAsBuffer(state.baselineFile)));
 		this.current = codec.Open(ResourceSource.FromBuffer(readAsBuffer(state.currentFile)));
 		this.view.updateRawImage(this.baseline);
 		this.pager.SetContentSize(new Vec2(this.view.width, this.view.height));
 	}
 
-	watch() {
+	private watch() {
 		autorun(() => {
 			this.update();
 		});
 	}
 
-	blink() {
+	private blink() {
 		let displayBaseline = true;
 		this.timer = setInterval(() => {
 			if (displayBaseline) {
