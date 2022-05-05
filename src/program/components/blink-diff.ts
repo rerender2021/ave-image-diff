@@ -26,7 +26,7 @@ export class BlinkDiff extends Component {
 		this.onCreate();
 	}
 
-	onCreate() {
+	private onCreate() {
 		const { window } = this;
 
 		//
@@ -49,13 +49,13 @@ export class BlinkDiff extends Component {
 		this.pager.SetContentSize(new Vec2(this.view.width, this.view.height));
 	}
 
-	watch() {
+	private watch() {
 		autorun(() => {
 			this.update();
 		});
 	}
 
-	blink() {
+	private blink() {
 		let displayBaseline = true;
 		this.timer = setInterval(() => {
 			if (displayBaseline) {

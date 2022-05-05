@@ -7,7 +7,7 @@ export class Main extends Area {
 	private content: Content;
 	private sidebar: Sidebar;
 
-	onCreate(): GridLayout {
+	protected onCreate(): GridLayout {
 		const { window } = this;
 
 		this.content = new Content(window).create();
@@ -17,7 +17,7 @@ export class Main extends Area {
 		return container;
 	}
 
-	onCreateLayout() {
+	private onCreateLayout() {
 		const { window } = this;
 
 		const containerLayout = {
