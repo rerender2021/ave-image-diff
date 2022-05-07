@@ -12,8 +12,6 @@ export class Program {
 	private mainArea: Main;
 
 	private theme: ThemeImage;
-	private themeDark: ThemePredefined_Dark;
-	private themeGeek: ThemeFileImage;
 
 	constructor() {
 		this.app = new App();
@@ -23,10 +21,6 @@ export class Program {
 		state.setResMap(resMap);
 
 		this.theme = new ThemeImage();
-		this.themeDark = new ThemePredefined_Dark();
-		this.themeGeek = new ThemeFileImage();
-		if (!this.themeGeek.Open(ResourceSource.FromPackedFile(assetPath("HyperEmerald.ave-theme-image"))))
-			this.themeGeek = null;
 
 		const cpWindow = new WindowCreation();
 		cpWindow.Title = "Image Diff";
@@ -53,12 +47,14 @@ export class Program {
 					break;
 				}
 				case ThemeSelection.Dark: {
-					this.themeDark.SetStyle(this.theme, 0);
+					const themeDark = new ThemePredefined_Dark();
+					themeDark.SetStyle(this.theme, 0);
 					break;
 				}
 				case ThemeSelection.Geek: {
-					if (this.themeGeek)
-						this.themeGeek.SetTheme(this.theme, 0);
+					const themeGeek = new ThemeFileImage();
+					if (themeGeek.Open(ResourceSource.FromPackedFile(assetPath("HyperEmerald.ave-theme-image"))))
+						themeGeek.SetTheme(this.theme, 0);
 					break;
 				}
 			}
