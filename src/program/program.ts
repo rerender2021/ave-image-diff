@@ -1,13 +1,19 @@
-import { App, WindowCreation, Window, WindowFlag } from "ave-ui";
+import { App, WindowCreation, Window, WindowFlag, ThemeImage, ThemePredefined_Dark, ThemeFileImage, ResourceSource } from "ave-ui";
+import { autorun } from "mobx";
+import { assetPath } from "../utils";
 import { Main } from "./components";
 import { iconDataMap } from "./resource";
-import { state } from "./state";
+import { state, ThemeSelection } from "./state";
 
 export class Program {
-	app: App;
-	window: Window;
+	private app: App;
+	private window: Window;
 
-	mainArea: Main;
+	private mainArea: Main;
+
+	private theme: ThemeImage;
+	private themeDark: ThemePredefined_Dark;
+	private themeGeek: ThemeImage;
 
 	constructor() {
 		this.app = new App();
@@ -16,14 +22,22 @@ export class Program {
 		const resMap = this.app.CreateResourceMap(this.app, [16], iconDataMap);
 		state.setResMap(resMap);
 
+		this.theme = new ThemeImage();
+		this.themeDark = new ThemePredefined_Dark();
+		const themeFile = new ThemeFileImage();
+		themeFile.Open(ResourceSource.FromPackedFile(assetPath("HyperEmerald.ave-theme-image")));
+		this.themeGeek = themeFile.CreateTheme();
+
 		const cpWindow = new WindowCreation();
 		cpWindow.Title = "Image Diff";
 		cpWindow.Flag |= WindowFlag.Layered;
+		cpWindow.Theme = this.theme;
 
 		this.window = new Window(cpWindow);
 	}
 
 	run() {
+		this.watch();
 		this.onCreateContent();
 		if (!this.window.CreateWindow()) process.exit(-1);
 
@@ -31,7 +45,25 @@ export class Program {
 		this.window.Activate();
 	}
 
-	onCreateContent() {
+	private watch() {
+		autorun(() => {
+			switch (state.currentTheme) {
+				case ThemeSelection.Light: {
+					this.theme.ResetTheme();
+					break;
+				}
+				case ThemeSelection.Dark: {
+					this.themeDark.SetStyle(this.theme, 0);
+					break;
+				}
+				case ThemeSelection.Geek: {
+					
+				}
+			}
+		});
+	}
+
+	private onCreateContent() {
 		this.window.OnCreateContent((window) => {
 			window.SetIcon(state.getResMap().WindowIcon);
 			this.mainArea = new Main(window).create();

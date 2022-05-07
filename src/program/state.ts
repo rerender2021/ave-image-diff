@@ -8,6 +8,12 @@ export enum MiniViewSelection {
 	Current = 1,
 }
 
+export enum ThemeSelection {
+	Light = 0,
+	Dark = 1,
+	Geek = 2
+}
+
 export class ProgramState {
 	blink: boolean;
 	threshold: number;
@@ -23,6 +29,7 @@ export class ProgramState {
 	currentFile: string;
 	currentMiniView: MiniViewSelection;
 	miniViewUpdateKey: number;
+	currentTheme: ThemeSelection;
 
 	// not ui related state
 	private resMap: IconDataMapType;
@@ -43,6 +50,7 @@ export class ProgramState {
 		this.currentFile = assetPath("map-current.png");
 		this.currentMiniView = MiniViewSelection.Baseline;
 		this.miniViewUpdateKey = Date.now();
+		this.currentTheme = ThemeSelection.Light;
 
 		makeObservable(this, {
 			blink: observable,
@@ -76,7 +84,10 @@ export class ProgramState {
 			setCurrentMiniView: action,
 
 			miniViewUpdateKey: observable,
-			setMiniViewUpdateKey: action
+			setMiniViewUpdateKey: action,
+
+			currentTheme: observable,
+			setCurrentTheme: action
 		});
 	}
 
@@ -139,6 +150,10 @@ export class ProgramState {
 	setZoom(zoom: number) {
 		this.zoom = zoom;
 		console.log(`zoom: ${zoom}`);
+	}
+
+	setCurrentTheme(theme: ThemeSelection) {
+		this.currentTheme = theme;
 	}
 }
 

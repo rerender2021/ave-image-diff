@@ -21,6 +21,9 @@ export class Sidebar extends Area {
 	private blinkCheckBox: CheckBox;
 	private blinkText: TextBox;
 
+	private themeText: TextBox;
+	private themeSwitch: ComboBox;
+
 	private content: Content;
 
 	constructor(window: Window, content: Content) {
@@ -85,6 +88,16 @@ export class Sidebar extends Area {
 		});
 
 		//
+		this.themeText = createText("Theme");
+		this.themeSwitch = new ComboBox(window);
+		this.themeSwitch.Append("Light", "Dark", "Geek");
+		this.themeSwitch.Select(0);
+		this.themeSwitch.OnSelectionChange((comboBox: ComboBox) => {
+			const i = comboBox.GetSelection();
+			state.setCurrentTheme(i);
+		});
+
+		//
 		this.track(this.content.baselineImage);
 		this.watch();
 
@@ -119,7 +132,7 @@ export class Sidebar extends Area {
 		const { window } = this;
 
 		const containerLayout = {
-			rows: "32dpx 128px 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 1",
+			rows: "32dpx 128px 16dpx 16dpx 20dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 20dpx 1",
 			columns: "1 1",
 			areas: {
 				miniView: { x: 0, y: 1, xspan: 2, yspan: 1 },
@@ -133,6 +146,8 @@ export class Sidebar extends Area {
 				zoom: { x: 1, y: 10 },
 				blinkText: { x: 0, y: 12 },
 				blink: { x: 1, y: 12 },
+				themeText: { x: 0, y: 14 },
+				themeSwitch: { x: 1, y: 14 },
 			},
 		};
 		const container = createGridLayout(window, containerLayout);
@@ -152,6 +167,9 @@ export class Sidebar extends Area {
 		container.addControl(this.miniView.control, containerLayout.areas.miniView);
 		container.addControl(this.miniViewText, containerLayout.areas.miniViewText);
 		container.addControl(this.miniViewSwitch, containerLayout.areas.miniViewSwitch);
+
+		container.addControl(this.themeText, containerLayout.areas.themeText);
+		container.addControl(this.themeSwitch, containerLayout.areas.themeSwitch);
 
 		return container;
 	}
