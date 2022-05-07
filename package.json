@@ -2,7 +2,24 @@
   "name": "ave-image-diff",
   "version": "1.0.0",
   "description": "A simple image diff tool powered by avernakis.",
-  "main": "src/index.js",
+  "keywords": [
+    "gui",
+    "desktop",
+    "avernakis",
+    "ave",
+    "image diff"
+  ],
+  "bin": {
+    "image-diff": "bin/script/cli.js"
+  },
+  "files": [
+    "bin"
+  ],
+  "homepage": "https://github.com/rerender2021/ave-image-diff",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rerender2021/ave-image-diff"
+  },
   "scripts": {
     "dev": "tsnd --respawn ./src/index.ts",
     "prebuild": "del-cli ./build",
@@ -12,7 +29,7 @@
     "release": "ave-pack pack",
     "postrelease": "copyfiles ./script/* ./bin"
   },
-  "author": "",
+  "author": "ivjtk; rerender2021",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^17.0.21",
