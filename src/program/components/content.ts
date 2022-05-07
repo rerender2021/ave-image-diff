@@ -4,7 +4,6 @@ import { Area, createGridLayout, GridLayout, ImageView } from "../../components"
 import { BlinkDiff } from "./blink-diff";
 import { NormalDiff } from "./normal-diff";
 import { MiniViewSelection, state } from "../state";
-import { getApp } from "../utils";
 import { ZoomArea } from "./zoom";
 
 export class Content extends Area {
@@ -205,7 +204,7 @@ export class Content extends Area {
 	}
 
 	private update() {
-		const codec = getApp().GetImageCodec();
+		const codec = state.getApp().GetImageCodec();
 		this.baselineImage.updateRawImage(codec.Open(this.baselineSource));
 		this.currentImage.updateRawImage(codec.Open(this.currentSource));
 

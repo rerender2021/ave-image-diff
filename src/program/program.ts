@@ -1,6 +1,7 @@
 import { App, WindowCreation, Window, WindowFlag } from "ave-ui";
 import { Main } from "./components";
-import { setApp } from "./utils";
+import { iconDataMap } from "./resource";
+import { state } from "./state";
 
 export class Program {
 	app: App;
@@ -10,7 +11,10 @@ export class Program {
 
 	constructor() {
 		this.app = new App();
-		setApp(this.app);
+		state.setApp(this.app);
+
+		const resMap = this.app.CreateResourceMap(this.app, [16], iconDataMap);
+		state.setResMap(resMap);
 
 		const cpWindow = new WindowCreation();
 		cpWindow.Title = "Image Diff";
@@ -29,6 +33,7 @@ export class Program {
 
 	onCreateContent() {
 		this.window.OnCreateContent((window) => {
+			window.SetIcon(state.getResMap().WindowIcon);
 			this.mainArea = new Main(window).create();
 			window.SetContent(this.mainArea.control);
 			return true;

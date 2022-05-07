@@ -1,6 +1,7 @@
-import { Vec2, Vec4 } from "ave-ui";
+import { App, Vec2, Vec4 } from "ave-ui";
 import { makeObservable, observable, action } from "mobx";
 import { assetPath } from "../utils";
+import { IconDataMapType } from "./resource";
 
 export enum MiniViewSelection {
 	Baseline = 0,
@@ -22,6 +23,10 @@ export class ProgramState {
 	currentFile: string;
 	currentMiniView: MiniViewSelection;
 	miniViewUpdateKey: number;
+
+	// not ui related state
+	private resMap: IconDataMapType;
+	private app: App;
 
 	constructor() {
 		this.blink = false;
@@ -73,6 +78,22 @@ export class ProgramState {
 			miniViewUpdateKey: observable,
 			setMiniViewUpdateKey: action
 		});
+	}
+
+	setApp(app: App) {
+		this.app = app;
+	}
+
+	getApp() {
+		return this.app;
+	}
+
+	setResMap(resMap: IconDataMapType) {
+		this.resMap = resMap;
+	}
+
+	getResMap(): IconDataMapType {
+		return this.resMap as IconDataMapType;
 	}
 
 	setMiniViewUpdateKey(key: number) {
