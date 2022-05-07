@@ -1,17 +1,43 @@
 {
-  "name": "ave-nodejs-template",
+  "name": "ave-image-diff",
   "version": "1.0.0",
-  "description": "quick start for ave-ui",
-  "main": "src/index.js",
-  "scripts": {
-    "dev": "tsnd --respawn ./src/index.ts"
+  "description": "A simple image diff tool powered by avernakis.",
+  "keywords": [
+    "gui",
+    "desktop",
+    "avernakis",
+    "ave",
+    "image diff"
+  ],
+  "bin": {
+    "image-diff": "bin/script/cli.js"
   },
-  "author": "",
+  "files": [
+    "bin"
+  ],
+  "homepage": "https://github.com/rerender2021/ave-image-diff",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rerender2021/ave-image-diff"
+  },
+  "scripts": {
+    "dev": "tsnd --respawn ./src/index.ts",
+    "prebuild": "del-cli ./build",
+    "build": "tsc",
+    "postbuild": "copyfiles ./assets/* ./build",
+    "prerelease": "npm run build && del-cli ./bin",
+    "release": "ave-pack pack",
+    "postrelease": "copyfiles ./script/* ./bin"
+  },
+  "author": "ivjtk; rerender2021",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^17.0.21",
+    "ave-pack": "^0.9.2",
     "ave-ui": "^0.1.5",
     "color": "^4.2.3",
+    "copyfiles": "^2.4.1",
+    "del-cli": "^4.0.1",
     "mobx": "^6.5.0",
     "ts-node-dev": "^1.1.8",
     "typescript": "^4.6.2"
