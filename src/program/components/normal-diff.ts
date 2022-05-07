@@ -43,7 +43,7 @@ export class NormalDiff extends Component {
 				return;
 			}
 
-			this.update(this.baseline, this.current, state.threshold, state.blendAlpha);
+			this.update(this.baseline, this.current, state.threshold, state.blendAlpha, state.zoom);
 		});
 	}
 
@@ -64,7 +64,7 @@ export class NormalDiff extends Component {
 		return data;
 	}
 
-	update(baseline: AveImage, current: AveImage, fThreshold = 0, blendAlpha = 0.5) {
+	update(baseline: AveImage, current: AveImage, fThreshold = 0, blendAlpha = 0.5, zoom = 1) {
 		if (!baseline || !current) {
 			return;
 		}
@@ -104,7 +104,7 @@ export class NormalDiff extends Component {
 		console.timeEnd("pixelmatch");
 
 		this.view.updateRawData(this.diffData);
-		this.pager.SetContentSize(new Vec2(md0.Width, md0.Height));
+		this.pager.SetContentSize(new Vec2(md0.Width * zoom, md0.Height * zoom));
 	}
 
 	setZoom(zoom: number) {
