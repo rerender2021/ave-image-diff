@@ -1,4 +1,4 @@
-import { App, WindowCreation, Window, WindowFlag, ThemeImage, ThemePredefined_Dark, ThemeFileImage, ResourceSource } from "ave-ui";
+import { App, WindowCreation, Window, WindowFlag, ThemeImage, ThemePredefined_Dark, ThemeFileImage, ResourceSource, ThemeFile } from "ave-ui";
 import { autorun } from "mobx";
 import { assetPath } from "../utils";
 import { Main } from "./components";
@@ -13,7 +13,7 @@ export class Program {
 
 	private theme: ThemeImage;
 	private themeDark: ThemePredefined_Dark;
-	private themeGeek: ThemeImage;
+	private themeGeek: ThemeFileImage;
 
 	constructor() {
 		this.app = new App();
@@ -24,9 +24,9 @@ export class Program {
 
 		this.theme = new ThemeImage();
 		this.themeDark = new ThemePredefined_Dark();
-		const themeFile = new ThemeFileImage();
-		themeFile.Open(ResourceSource.FromPackedFile(assetPath("HyperEmerald.ave-theme-image")));
-		this.themeGeek = themeFile.CreateTheme();
+		this.themeGeek = new ThemeFileImage();
+		if (!this.themeGeek.Open(ResourceSource.FromPackedFile(assetPath("HyperEmerald.ave-theme-image"))))
+			this.themeGeek = null;
 
 		const cpWindow = new WindowCreation();
 		cpWindow.Title = "Image Diff";
@@ -57,9 +57,13 @@ export class Program {
 					break;
 				}
 				case ThemeSelection.Geek: {
-					
+					if (this.themeGeek)
+						this.themeGeek.SetTheme(this.theme, 0);
+					break;
 				}
 			}
+			if (this.window && this.window.IsWindowCreated())
+				this.window.Redraw();
 		});
 	}
 
