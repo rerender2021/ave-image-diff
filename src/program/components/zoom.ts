@@ -52,8 +52,8 @@ export class ZoomArea extends Area {
 
 	private watch() {
 		autorun(() => {
-			this.baselinePosText.SetText(`Baseline Position: ${state.pixelPos.x}, ${state.pixelPos.y}`);
-			this.currentPosText.SetText(`Current Position: ${state.pixelPos.x}, ${state.pixelPos.y}`);
+			this.baselinePosText.SetText(state.i18n.t("BaselinePosition", { x: state.pixelPos.x, y: state.pixelPos.y }));
+			this.currentPosText.SetText(state.i18n.t("CurrentPosition", { x: state.pixelPos.x, y: state.pixelPos.y }));
 
 			const baseline = state.pixelColor.baseline;
 			const current = state.pixelColor.current;
@@ -63,6 +63,11 @@ export class ZoomArea extends Area {
 
 			this.baselineHexText.SetText(`Hex: ${Color({ r: baseline.r, g: baseline.g, b: baseline.b }).hex()}`);
 			this.currentHexText.SetText(`Hex: ${Color({ r: current.r, g: current.g, b: current.b }).hex()}`);
+		});
+
+		this.window.OnLanguageChange((sender) => {
+			this.baselinePosText.SetText(state.i18n.t("BaselinePosition", { x: state.pixelPos.x, y: state.pixelPos.y }));
+			this.currentPosText.SetText(state.i18n.t("CurrentPosition", { x: state.pixelPos.x, y: state.pixelPos.y }));
 		});
 	}
 

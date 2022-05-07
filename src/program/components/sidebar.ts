@@ -1,4 +1,4 @@
-import { CheckBox, CheckValue, ComboBox, TextBox, TrackBar, Window } from "ave-ui";
+import { CheckBox, CheckValue, ComboBox, StringKey, TextBox, TrackBar, Window } from "ave-ui";
 import { autorun } from "mobx";
 import { Area, createGridLayout, GridLayout, ImageView, MiniView } from "../../components";
 import { KeyOfLang } from "../i18n";
@@ -78,8 +78,9 @@ export class Sidebar extends Area {
 		this.miniViewText = createText("MiniView");
 
 		//
-		this.miniViewSwitch = new ComboBox(window);
-		this.miniViewSwitch.Append("Baseline", "Current");
+		this.miniViewSwitch = new ComboBox(window, new StringKey("MiniViewType", 0, 2));
+		//  append empty string as placeholder
+		this.miniViewSwitch.Append("", "");
 		this.miniViewSwitch.Select(0);
 		this.miniViewSwitch.OnSelectionChange((comboBox: ComboBox) => {
 			const i = comboBox.GetSelection();
@@ -88,8 +89,8 @@ export class Sidebar extends Area {
 
 		//
 		this.themeText = createText("Theme");
-		this.themeSwitch = new ComboBox(window);
-		this.themeSwitch.Append("Light", "Dark", "Geek");
+		this.themeSwitch = new ComboBox(window, new StringKey("ThemeType", 0, 3));
+		this.themeSwitch.Append("", "", "");
 		this.themeSwitch.Select(0);
 		this.themeSwitch.OnSelectionChange((comboBox: ComboBox) => {
 			const i = comboBox.GetSelection();

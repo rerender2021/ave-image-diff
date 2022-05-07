@@ -14,6 +14,13 @@ export interface ILang {
 	BlendAlpha: string;
 	Zoom: string;
 	Blink: string;
+	BaselinePosition: string;
+	CurrentPosition: string;
+	MiniViewType0: string;
+	MiniViewType1: string;
+	ThemeType0: string;
+	ThemeType1: string;
+	ThemeType2: string;
 }
 
 export type KeyOfLang = keyof ILang;
@@ -39,7 +46,7 @@ export function initI18n(app: App) {
 		},
 		lang: {
 			[CultureId.en_us]: {
-				AppTitle: "Color Picker",
+				AppTitle: "Image Diff",
 				CoOk: "OK",
 				__FontStd: "Segoe UI",
 
@@ -51,9 +58,16 @@ export function initI18n(app: App) {
 				BlendAlpha: "Blend Alpha",
 				Zoom: "Zoom",
 				Blink: "Blink",
+				BaselinePosition: "Baseline Position: {{x}}, {{y}}",
+				CurrentPosition: "Current Position: {{x}}, {{y}}",
+				MiniViewType0: "Baseline",
+				MiniViewType1: "Current",
+				ThemeType0: "Light",
+				ThemeType1: "Dark",
+				ThemeType2: "Geek",
 			},
 			[CultureId.zh_cn]: {
-				AppTitle: "颜色选择器",
+				AppTitle: "图像对比",
 				CoOk: "好的",
 				__FontStd: "Microsoft YaHei UI",
 
@@ -65,6 +79,13 @@ export function initI18n(app: App) {
 				BlendAlpha: "透明度",
 				Zoom: "缩放",
 				Blink: "闪烁切换",
+				BaselinePosition: "基准图位置: {{x}}, {{y}}",
+				CurrentPosition: "当前图位置: {{x}}, {{y}}",
+				MiniViewType0: "基准图",
+				MiniViewType1: "当前图",
+				ThemeType0: "亮色",
+				ThemeType1: "暗色",
+				ThemeType2: "极客风",
 			},
 		},
 	};
