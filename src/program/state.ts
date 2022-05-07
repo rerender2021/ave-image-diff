@@ -1,6 +1,7 @@
 import { App, Vec2, Vec4 } from "ave-ui";
 import { makeObservable, observable, action } from "mobx";
 import { assetPath } from "../utils";
+import { Ii18n } from "./i18n";
 import { IconDataMapType } from "./resource";
 
 export enum MiniViewSelection {
@@ -11,7 +12,7 @@ export enum MiniViewSelection {
 export enum ThemeSelection {
 	Light = 0,
 	Dark = 1,
-	Geek = 2
+	Geek = 2,
 }
 
 export class ProgramState {
@@ -34,6 +35,7 @@ export class ProgramState {
 	// not ui related state
 	private resMap: IconDataMapType;
 	private app: App;
+	private _i18n: Ii18n;
 
 	constructor() {
 		this.blink = false;
@@ -87,8 +89,16 @@ export class ProgramState {
 			setMiniViewUpdateKey: action,
 
 			currentTheme: observable,
-			setCurrentTheme: action
+			setCurrentTheme: action,
 		});
+	}
+
+	setI18n(i18n: Ii18n) {
+		this._i18n = i18n;
+	}
+
+	get i18n() {
+		return this._i18n;
 	}
 
 	setApp(app: App) {
