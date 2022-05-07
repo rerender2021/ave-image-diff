@@ -1,6 +1,7 @@
-import { CheckBox, CheckValue, ComboBox, TextBox, TrackBar, Window } from "ave-ui";
+import { CheckBox, CheckValue, ComboBox, StringKey, TextBox, TrackBar, Window } from "ave-ui";
 import { autorun } from "mobx";
 import { Area, createGridLayout, GridLayout, ImageView, MiniView } from "../../components";
+import { KeyOfLang } from "../i18n";
 import { MiniViewSelection, state } from "../state";
 import { Content } from "./content";
 
@@ -35,24 +36,22 @@ export class Sidebar extends Area {
 		const { window } = this;
 
 		//
-		this.blinkCheckBox = new CheckBox(window);
-		this.blinkCheckBox.SetText("Blink");
+		this.blinkCheckBox = new CheckBox(window, "Blink");
 		this.blinkCheckBox.OnCheck((sender: CheckBox) => {
 			const checkValue = sender.GetValue();
 			state.setBlink(checkValue === CheckValue.Checked);
 		});
 
-		const createText = (s: string): TextBox => {
-			const txt = new TextBox(window);
+		const createText = (key: KeyOfLang): TextBox => {
+			const txt = new TextBox(window, key);
 			txt.SetReadOnly(true);
 			txt.SetBorder(false);
-			txt.SetText(s);
 			return txt;
 		};
 
 		this.blinkText = createText("Mode");
 
-		const createSlider = (nMin, nMax, nDef, s, fn): [TrackBar, TextBox] => {
+		const createSlider = (nMin, nMax, nDef, s: KeyOfLang, fn): [TrackBar, TextBox] => {
 			const tb = new TrackBar(window);
 			tb.SetMinimum(nMin).SetMaximum(nMax).SetValue(nDef);
 			tb.OnThumbChange(fn);
@@ -66,7 +65,7 @@ export class Sidebar extends Area {
 			state.setThreshold(sender.GetValue() / 100);
 		});
 
-		[this.blendAlphaScroll, this.blendAlphaText] = createSlider(0, 100, 50, "Blend Alpha", (sender: TrackBar) => {
+		[this.blendAlphaScroll, this.blendAlphaText] = createSlider(0, 100, 50, "BlendAlpha", (sender: TrackBar) => {
 			state.setBlendAlpha(sender.GetValue() / 100);
 		});
 
@@ -76,11 +75,12 @@ export class Sidebar extends Area {
 
 		//
 		this.miniView = new MiniView(window);
-		this.miniViewText = createText("Mini View");
+		this.miniViewText = createText("MiniView");
 
 		//
-		this.miniViewSwitch = new ComboBox(window);
-		this.miniViewSwitch.Append("Baseline", "Current");
+		this.miniViewSwitch = new ComboBox(window, new StringKey("MiniViewType", 0, 2));
+		//  append empty string as placeholder
+		this.miniViewSwitch.Append("", "");
 		this.miniViewSwitch.Select(0);
 		this.miniViewSwitch.OnSelectionChange((comboBox: ComboBox) => {
 			const i = comboBox.GetSelection();
@@ -89,8 +89,8 @@ export class Sidebar extends Area {
 
 		//
 		this.themeText = createText("Theme");
-		this.themeSwitch = new ComboBox(window);
-		this.themeSwitch.Append("Light", "Dark", "Geek");
+		this.themeSwitch = new ComboBox(window, new StringKey("ThemeType", 0, 3));
+		this.themeSwitch.Append("", "", "");
 		this.themeSwitch.Select(0);
 		this.themeSwitch.OnSelectionChange((comboBox: ComboBox) => {
 			const i = comboBox.GetSelection();
@@ -132,7 +132,7 @@ export class Sidebar extends Area {
 		const { window } = this;
 
 		const containerLayout = {
-			rows: "32dpx 128px 16dpx 16dpx 20dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 20dpx 1",
+			rows: "32dpx 128px 16dpx 16dpx 24dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 24dpx 1",
 			columns: "1 1",
 			areas: {
 				miniView: { x: 0, y: 1, xspan: 2, yspan: 1 },
