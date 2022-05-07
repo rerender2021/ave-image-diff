@@ -39,6 +39,10 @@ export class NormalDiff extends Component {
 
 	private watch() {
 		autorun(() => {
+			if (state.blink) {
+				return;
+			}
+
 			this.update(this.baseline, this.current, state.threshold, state.blendAlpha);
 		});
 	}
