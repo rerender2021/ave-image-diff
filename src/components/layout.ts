@@ -74,10 +74,10 @@ export class GridLayout<AreaName extends string = string> extends Component {
 }
 
 function parseSize(size: string) {
-	if (size.endsWith("px")) {
-		return DpiSize.FromPixel(parseInt(size.replace("px", "")));
-	} else if (size.endsWith("dpx")) {
+	if (size.endsWith("dpx")) {
 		return DpiSize.FromPixelScaled(parseInt(size.replace("dpx", "")));
+	} else if (size.endsWith("px")) {
+		return DpiSize.FromPixel(parseInt(size.replace("px", "")));
 	} else {
 		return DpiSize.FromSlice(parseInt(size));
 	}
