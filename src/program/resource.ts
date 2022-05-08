@@ -12,6 +12,7 @@ export const iconDataMap = {
 	WindowIcon: createAssetPath("compare#*.png"),
 	Scale: createAssetPath("scale#*.png"),
 	Language: createAssetPath("language#*.png"),
+	Theme: createAssetPath("theme#*.png"),
 };
 
 export type IconDataMapType = Record<keyof typeof iconDataMap, number>;

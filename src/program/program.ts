@@ -77,6 +77,8 @@ export class Program {
 	}
 
 	private createToolbar(window: Window) {
+		//----------------------------------------------------------------------------------------------------
+		// Scale
 		const menuScale = new Menu(window, new StringKey("Scale", 0, 2));
 		menuScale.InsertItem(new MenuItem(WindowScale.SystemDefault + 1));
 		menuScale.InsertItem(new MenuItem(WindowScale.MonitorOptimized + 1));
@@ -90,7 +92,8 @@ export class Program {
 			window.SetScale(nId - 1);
 		});
 
-		//
+		//----------------------------------------------------------------------------------------------------
+		// Language
 		const menuLang = new Menu(window);
 		menuLang.OnClick((menu, nId) => {
 			state.i18n.switch(nId - 1);
@@ -104,7 +107,19 @@ export class Program {
 		state.i18n.switch(CultureId.en_us);
 		menuLang.SetRadioId(CultureId.en_us + 1);
 
-		//
+		//----------------------------------------------------------------------------------------------------
+		// Theme
+		const menuTheme = new Menu(window, new StringKey("ThemeType", 0, 3));
+		menuTheme.InsertItem(new MenuItem(1));
+		menuTheme.InsertItem(new MenuItem(2));
+		menuTheme.InsertItem(new MenuItem(3));
+		menuTheme.SetRadioId(1);
+		menuTheme.OnClick((sender, nId) => {
+			sender.SetRadioId(nId);
+			state.setCurrentTheme(nId - 1);
+		});
+		//----------------------------------------------------------------------------------------------------
+		// Toolbar
 		const toolbar = new ToolBar(window);
 		toolbar.SetBackground(false);
 		const ToolBarItemId = {
@@ -114,8 +129,10 @@ export class Program {
 		};
 		toolbar.ToolInsert(new ToolBarItem(ToolBarItemId.Scale, ToolBarItemType.ButtonDrop, window.CacheIcon(new IconSource(state.getResMap().Scale, 16))), -1);
 		toolbar.ToolInsert(new ToolBarItem(ToolBarItemId.Lang, ToolBarItemType.ButtonDrop, window.CacheIcon(new IconSource(state.getResMap().Language, 16))), -1);
+		toolbar.ToolInsert(new ToolBarItem(ToolBarItemId.Theme, ToolBarItemType.ButtonDrop, window.CacheIcon(new IconSource(state.getResMap().Theme, 16))), -1);
 		toolbar.DropSetById(ToolBarItemId.Scale, menuScale);
 		toolbar.DropSetById(ToolBarItemId.Lang, menuLang);
+		toolbar.DropSetById(ToolBarItemId.Theme, menuTheme);
 		window.GetFrame().SetToolBarRight(toolbar);
 	}
 }

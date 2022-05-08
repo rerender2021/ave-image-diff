@@ -140,13 +140,13 @@ export class Content extends Area {
 
 		//
 		const containerLayout = {
-			rows: "32dpx 1 32dpx 1 32dpx",
-			columns: "32dpx 1 32dpx 1 32dpx",
+			rows: "1 6dpx 1",
+			columns: "1 6dpx 1",
 			areas: {
-				baseline: { x: 1, y: 1 },
-				current: { x: 3, y: 1 },
-				diff: { x: 1, y: 3 },
-				zoom: { x: 3, y: 3 },
+				baseline: { x: 0, y: 0 },
+				current: { x: 2, y: 0 },
+				diff: { x: 0, y: 2 },
+				zoom: { x: 2, y: 2 },
 			},
 		};
 		const container = createGridLayout(window, containerLayout);

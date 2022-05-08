@@ -4,6 +4,7 @@ import { Area, createGridLayout, ZoomView } from "../../components";
 import { state } from "../state";
 import { Content } from "./content";
 import * as Color from "color";
+import { Sidebar } from "./sidebar";
 
 export class ZoomArea extends Area {
 	private baselineZoomView: ZoomView;
@@ -17,6 +18,7 @@ export class ZoomArea extends Area {
 	private currentHexText: TextBox;
 
 	private content: Content;
+	private sidebar: Sidebar;
 
 	constructor(window: Window, content: Content) {
 		super(window);
@@ -43,6 +45,8 @@ export class ZoomArea extends Area {
 		this.currentPosText = createText("Current Position:");
 		this.currentColorText = createText("RGBA:");
 		this.currentHexText = createText("Hex:");
+
+		this.sidebar = new Sidebar(window, this.content).create();
 
 		this.watch();
 
@@ -75,17 +79,18 @@ export class ZoomArea extends Area {
 		const { window } = this;
 
 		const containerLayout = {
-			rows: "1 192dpx 4dpx 16dpx 4dpx 16dpx 4dpx 16dpx 1",
-			columns: "1 192dpx 16dpx 192dpx 1",
+			rows: "1 4dpx 16dpx 4dpx 16dpx 4dpx 16dpx 4dpx",
+			columns: "1 4dpx 1 4dpx 1",
 			areas: {
-				baseline: { x: 1, y: 1 },
-				baselinePosText: { x: 1, y: 3 },
-				baselineColorText: { x: 1, y: 5 },
-				baselineHexText: { x: 1, y: 7 },
-				current: { x: 3, y: 1 },
-				currentPosText: { x: 3, y: 3 },
-				currentColorText: { x: 3, y: 5 },
-				currentHexText: { x: 3, y: 7 },
+				baseline: { x: 0, y: 0 },
+				baselinePosText: { x: 0, y: 2 },
+				baselineColorText: { x: 0, y: 4 },
+				baselineHexText: { x: 0, y: 6 },
+				current: { x: 2, y: 0 },
+				currentPosText: { x: 2, y: 2 },
+				currentColorText: { x: 2, y: 4 },
+				currentHexText: { x: 2, y: 6 },
+				sidebar: { x: 4, y: 0, yspan: 8 },
 			},
 		};
 
@@ -103,12 +108,15 @@ export class ZoomArea extends Area {
 		container.addControl(this.baselineHexText, container.areas.baselineHexText);
 		container.addControl(this.currentHexText, container.areas.currentHexText);
 
+		container.addControl(this.sidebar.control, container.areas.sidebar);
+
 		return container;
 	}
 
 	update(baseline: IByo2Image, current: IByo2Image) {
 		this.baselineZoomView.track({ image: baseline });
 		this.currentZoomView.track({ image: current });
+		this.sidebar.update();
 	}
 
 	onPointerMove(pos: Vec2) {
