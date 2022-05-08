@@ -1,4 +1,4 @@
-import { App, WindowCreation, Window, WindowFlag, ThemeImage, ThemePredefined_Dark, ThemeFileImage, ResourceSource, ThemeFile, Menu, MenuItem, CultureId, MenuType, ToolBar, ToolBarItem, ToolBarItemType, IconSource } from "ave-ui";
+import { App, WindowCreation, Window, WindowFlag, ThemeImage, ThemePredefined_Dark, ThemeFileImage, ResourceSource, ThemeFile, Menu, MenuItem, CultureId, MenuType, ToolBar, ToolBarItem, ToolBarItemType, IconSource, StringKey, WindowScale } from "ave-ui";
 import { autorun } from "mobx";
 import { assetPath } from "../utils";
 import { Main } from "./components";
@@ -77,6 +77,19 @@ export class Program {
 	}
 
 	private createToolbar(window: Window) {
+		const menuScale = new Menu(window, new StringKey("Scale", 0, 2));
+		menuScale.InsertItem(new MenuItem(WindowScale.SystemDefault + 1));
+		menuScale.InsertItem(new MenuItem(WindowScale.MonitorOptimized + 1));
+		menuScale.InsertItem(new MenuItem(0, MenuType.Separator));
+		const scaleList = [100, 125, 150, 175, 200, 225, 250, 300, 350, 400];
+		for (let i = WindowScale.Percent100; i <= WindowScale.Percent400; ++i)
+			menuScale.InsertItem(new MenuItem(i + 1, MenuType.Text, 0, `${scaleList[i - WindowScale.Percent100]}%`));
+		menuScale.SetRadioId(window.GetScale() + 1);
+		menuScale.OnClick((sender, nId) => {
+			sender.SetRadioId(nId);
+			window.SetScale(nId - 1);
+		});
+
 		//
 		const menuLang = new Menu(window);
 		menuLang.OnClick((menu, nId) => {
@@ -95,11 +108,14 @@ export class Program {
 		const toolbar = new ToolBar(window);
 		toolbar.SetBackground(false);
 		const ToolBarItemId = {
-			Lang: 1,
-			Theme: 2,
+			Scale: 1,
+			Lang: 2,
+			Theme: 3,
 		};
+		toolbar.ToolInsert(new ToolBarItem(ToolBarItemId.Scale, ToolBarItemType.ButtonDrop, window.CacheIcon(new IconSource(state.getResMap().Scale, 16))), -1);
 		toolbar.ToolInsert(new ToolBarItem(ToolBarItemId.Lang, ToolBarItemType.ButtonDrop, window.CacheIcon(new IconSource(state.getResMap().Language, 16))), -1);
-		toolbar.DropSetById(1, menuLang);
+		toolbar.DropSetById(ToolBarItemId.Scale, menuScale);
+		toolbar.DropSetById(ToolBarItemId.Lang, menuLang);
 		window.GetFrame().SetToolBarRight(toolbar);
 	}
 }
