@@ -18,7 +18,7 @@ export class Program {
 		this.app = new App();
 		state.setApp(this.app);
 
-		const resMap = this.app.CreateResourceMap(this.app, [16], iconDataMap);
+		const resMap = this.app.CreateResourceMap(this.app, [16, 20, 24, 28, 30, 32, 36, 40, 42, 48, 54, 56, 60, 64, 72, 80, 84, 96, 112, 128], iconDataMap);
 		state.setResMap(resMap);
 
 		const i18n = initI18n(this.app);
