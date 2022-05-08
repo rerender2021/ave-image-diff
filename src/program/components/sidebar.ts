@@ -132,7 +132,7 @@ export class Sidebar extends Area {
 		const { window } = this;
 
 		const containerLayout = {
-			rows: "32dpx 128px 16dpx 16dpx 24dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 24dpx 1",
+			rows: "32dpx 128dpx 16dpx 16dpx 24dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 24dpx 1",
 			columns: "1 1",
 			areas: {
 				miniView: { x: 0, y: 1, xspan: 2, yspan: 1 },
