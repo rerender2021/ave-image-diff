@@ -34,7 +34,7 @@ Run:
 
 ![cpp opt](./docs/images/cpp-opt.png)
 
-Instead of using js implemented [pixelmatch](https://github.com/mapbox/pixelmatch), we use our C++ implementaion, which is 10x faster. (`300ms ~ 500ms -> 20ms ~ 30ms`)
+Instead of using js implemented [pixelmatch](https://github.com/mapbox/pixelmatch), we use our C++ implementation, which is 10x faster. (`300ms ~ 500ms -> 20ms ~ 30ms`)
 
 In this way, even tolerance can be adjusted in realtime for 4k image, which is impossible for [pixelmatch](https://github.com/mapbox/pixelmatch).
 
