@@ -1,6 +1,6 @@
 {
   "name": "ave-image-diff",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple image diff tool powered by avernakis.",
   "keywords": [
     "gui",
