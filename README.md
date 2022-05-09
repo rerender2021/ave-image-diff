@@ -56,6 +56,12 @@ In this way, even tolerance can be adjusted in realtime for 4k image, which is i
 
 ![theme](./docs/images/theme-geek.gif)
 
+-   hi-dpi support:
+
+![hi-dpi-1](./docs/images/hi-dpi-1.gif)
+
+![hi-dpi-2](./docs/images/hi-dpi-2.gif)
+
 -   basic controls: checkbox, trackbar, combo box ...
 -   custom component: reuse mini view, pixel view from [color picker](https://github.com/rerender2021/ave-color-picker)
 
