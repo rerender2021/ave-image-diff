@@ -40,6 +40,12 @@
 
 ![theme](./docs/images/theme-geek.gif)
 
+-   hi-dpi 支持：自动适应代码或系统设置的缩放比例
+
+![hi-dpi-1](./docs/images/hi-dpi-1.gif)
+
+![hi-dpi-2](./docs/images/hi-dpi-2.gif)
+
 -   基本控件：多选框、轨道条、下拉列表...
 -   自定义控件：复用 [color picker](https://github.com/rerender2021/ave-color-picker) 中的迷你视图、像素视图
 

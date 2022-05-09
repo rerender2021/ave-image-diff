@@ -40,17 +40,22 @@ export class ZoomView extends Component {
 		dip.Filter = DrawImageFilter.Point;
 
 		this.view.OnPaintPost((sender, painter, rc) => {
+			if (rc.IsEmpty)
+				return;
 			const { image } = this;
 			const width = image.GetWidth();
 			const height = image.GetHeight();
 
-			const blockSize = rc.w / 9;
-			if (this.pixelPos.x >= 0 && this.pixelPos.y >= 0 && this.pixelPos.x < width && this.pixelPos.y < height) {
+			const visibleBlock = 9;
+			const blockSize = Math.min(rc.w, rc.h) / visibleBlock;
+			const blockX = rc.w < rc.h ? visibleBlock : visibleBlock * rc.w / rc.h;
+			const blockY = rc.w < rc.h ? visibleBlock * rc.h / rc.w : visibleBlock;
+			if (this.pixelPos.x >= 0 && this.pixelPos.y >= 0 && this.pixelPos.x < width && this.pixelPos.y < height){
 				const v = Vec2.Zero;
-				dip.SourceRect.x = this.pixelPos.x - 4;
-				dip.SourceRect.y = this.pixelPos.y - 4;
-				dip.SourceRect.w = 9;
-				dip.SourceRect.h = 9;
+				dip.SourceRect.x = this.pixelPos.x - (blockX - 1) / 2;
+				dip.SourceRect.y = this.pixelPos.y - (blockY - 1) / 2;
+				dip.SourceRect.w = blockX;
+				dip.SourceRect.h = blockY;
 				dip.TargetSize.x = rc.w;
 				dip.TargetSize.y = rc.h;
 				if (dip.SourceRect.x < 0) {

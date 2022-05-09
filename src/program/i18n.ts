@@ -7,6 +7,8 @@ export interface ILang {
 	__FontStd: string;
 
 	// user defined key
+	Scale0: string;
+	Scale1: string;
 	MiniView: string;
 	Theme: string;
 	Mode: string;
@@ -51,6 +53,8 @@ export function initI18n(app: App) {
 				__FontStd: "Segoe UI",
 
 				//
+				Scale0: "Use System Setting",
+				Scale1: "Use Monitor Optimized",
 				MiniView: "Mini View",
 				Theme: "Theme",
 				Mode: "Mode",
@@ -72,6 +76,8 @@ export function initI18n(app: App) {
 				__FontStd: "Microsoft YaHei UI",
 
 				//
+				Scale0: "使用系统设置",
+				Scale1: "使用显示器推荐",
 				MiniView: "迷你视图",
 				Theme: "主题",
 				Mode: "模式",

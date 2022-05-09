@@ -10,7 +10,7 @@ export class Main extends Area {
 		const { window } = this;
 
 		this.content = new Content(window).create();
-		this.sidebar = new Sidebar(window, this.content).create();
+		//this.sidebar = new Sidebar(window, this.content).create();
 
 		const container = this.onCreateLayout();
 		return container;
@@ -21,7 +21,7 @@ export class Main extends Area {
 
 		const containerLayout = {
 			rows: "1",
-			columns: "1 192dpx 32dpx",
+			columns: "1",
 			areas: {
 				content: { x: 0, y: 0 },
 				sidebar: { x: 1, y: 0 },
@@ -30,7 +30,7 @@ export class Main extends Area {
 
 		const container = createGridLayout(window, containerLayout);
 		container.addControl(this.content.control, container.areas.content);
-		container.addControl(this.sidebar.control, container.areas.sidebar);
+		//container.addControl(this.sidebar.control, container.areas.sidebar);
 
 		return container;
 	}

@@ -1,4 +1,4 @@
-import { CheckBox, CheckValue, ComboBox, StringKey, TextBox, TrackBar, Window } from "ave-ui";
+import { AlignType, CheckBox, CheckValue, ComboBox, IControl, Label, Pager, PagerAdjustment, StringKey, TextBox, TrackBar, Window } from "ave-ui";
 import { autorun } from "mobx";
 import { Area, createGridLayout, GridLayout, ImageView, MiniView } from "../../components";
 import { KeyOfLang } from "../i18n";
@@ -7,23 +7,20 @@ import { Content } from "./content";
 
 export class Sidebar extends Area {
 	private miniView: MiniView;
-	private miniViewText: TextBox;
+	private miniViewText: IControl;
 	private miniViewSwitch: ComboBox;
 
 	private thresholdScroll: TrackBar;
-	private thresholdText: TextBox;
+	private thresholdText: IControl;
 
 	private blendAlphaScroll: TrackBar;
-	private blendAlphaText: TextBox;
+	private blendAlphaText: IControl;
 
 	private zoomScroll: TrackBar;
-	private zoomText: TextBox;
+	private zoomText: IControl;
 
 	private blinkCheckBox: CheckBox;
-	private blinkText: TextBox;
-
-	private themeText: TextBox;
-	private themeSwitch: ComboBox;
+	private blinkText: IControl;
 
 	private content: Content;
 
@@ -42,16 +39,16 @@ export class Sidebar extends Area {
 			state.setBlink(checkValue === CheckValue.Checked);
 		});
 
-		const createText = (key: KeyOfLang): TextBox => {
-			const txt = new TextBox(window, key);
-			txt.SetReadOnly(true);
-			txt.SetBorder(false);
+		const createText = (key: KeyOfLang): IControl => {
+			const txt = new Label(window, key);
+			txt.SetAlignHorz(AlignType.Far);
+			txt.SetWrappable(false);
 			return txt;
 		};
 
 		this.blinkText = createText("Mode");
 
-		const createSlider = (nMin, nMax, nDef, s: KeyOfLang, fn): [TrackBar, TextBox] => {
+		const createSlider = (nMin, nMax, nDef, s: KeyOfLang, fn): [TrackBar, IControl] => {
 			const tb = new TrackBar(window);
 			tb.SetMinimum(nMin).SetMaximum(nMax).SetValue(nDef);
 			tb.OnThumbChange(fn);
@@ -88,17 +85,7 @@ export class Sidebar extends Area {
 		});
 
 		//
-		this.themeText = createText("Theme");
-		this.themeSwitch = new ComboBox(window, new StringKey("ThemeType", 0, 3));
-		this.themeSwitch.Append("", "", "");
-		this.themeSwitch.Select(0);
-		this.themeSwitch.OnSelectionChange((comboBox: ComboBox) => {
-			const i = comboBox.GetSelection();
-			state.setCurrentTheme(i);
-		});
-
-		//
-		this.track(this.content.baselineImage);
+		//this.track(this.content.baselineImage);
 		this.watch();
 
 		const container = this.onCreateLayout();
@@ -113,7 +100,7 @@ export class Sidebar extends Area {
 		});
 	}
 
-	private update() {
+	update() {
 		if (state.currentMiniView === MiniViewSelection.Baseline) {
 			this.track(this.content.baselineImage);
 		} else if (state.currentMiniView === MiniViewSelection.Current) {
@@ -122,6 +109,8 @@ export class Sidebar extends Area {
 	}
 
 	private track(image: ImageView) {
+		if (!this.content.baselinePager)
+			return;
 		this.miniView.track({
 			pager: [this.content.baselinePager, this.content.currentPager, this.content.normalDiff.container, this.content.blinkDiff.contrainer],
 			image: image.native,
@@ -132,44 +121,54 @@ export class Sidebar extends Area {
 		const { window } = this;
 
 		const containerLayout = {
-			rows: "32dpx 128dpx 16dpx 16dpx 24dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 16dpx 24dpx 1",
-			columns: "1 1",
+			rows: "1 8dpx 128dpx",
+			columns: "1",
 			areas: {
-				miniView: { x: 0, y: 1, xspan: 2, yspan: 1 },
-				miniViewText: { x: 0, y: 4 },
-				miniViewSwitch: { x: 1, y: 4 },
-				thresholdText: { x: 0, y: 6 },
-				threshold: { x: 1, y: 6 },
-				blendAlphaText: { x: 0, y: 8 },
-				blendAlpha: { x: 1, y: 8 },
-				zoomText: { x: 0, y: 10 },
-				zoom: { x: 1, y: 10 },
-				blinkText: { x: 0, y: 12 },
-				blink: { x: 1, y: 12 },
-				themeText: { x: 0, y: 14 },
-				themeSwitch: { x: 1, y: 14 },
+				miniView: { x: 0, y: 0 },
+				option: { x: 0, y: 2 },
 			},
 		};
 		const container = createGridLayout(window, containerLayout);
 
-		container.addControl(this.blinkCheckBox, containerLayout.areas.blink);
-		container.addControl(this.blinkText, containerLayout.areas.blinkText);
+		const optionLayout = {
+			rows: "24dpx 8dpx 16dpx 8dpx 16dpx 8dpx 16dpx 8dpx 16dpx 8dpx",
+			columns: "6dpx 2 6dpx 3 6dpx",
+			areas: {
+				miniViewText: { x: 1, y: 0 },
+				miniViewSwitch: { x: 3, y: 0 },
+				thresholdText: { x: 1, y: 2 },
+				threshold: { x: 3, y: 2 },
+				blendAlphaText: { x: 1, y: 4 },
+				blendAlpha: { x: 3, y: 4 },
+				zoomText: { x: 1, y: 6 },
+				zoom: { x: 3, y: 6 },
+				blinkText: { x: 1, y: 8 },
+				blink: { x: 3, y: 8 },
+			},
+		};
+		const optionContainer = createGridLayout(window, optionLayout);
+		const optionPager = new Pager(window);
 
-		container.addControl(this.thresholdText, containerLayout.areas.thresholdText);
-		container.addControl(this.thresholdScroll, containerLayout.areas.threshold);
+		optionContainer.addControl(this.miniViewText, optionLayout.areas.miniViewText);
+		optionContainer.addControl(this.miniViewSwitch, optionLayout.areas.miniViewSwitch);
+		
+		optionContainer.addControl(this.thresholdText, optionLayout.areas.thresholdText);
+		optionContainer.addControl(this.thresholdScroll, optionLayout.areas.threshold);
 
-		container.addControl(this.blendAlphaText, containerLayout.areas.blendAlphaText);
-		container.addControl(this.blendAlphaScroll, containerLayout.areas.blendAlpha);
+		optionContainer.addControl(this.blendAlphaText, optionLayout.areas.blendAlphaText);
+		optionContainer.addControl(this.blendAlphaScroll, optionLayout.areas.blendAlpha);
 
-		container.addControl(this.zoomText, containerLayout.areas.zoomText);
-		container.addControl(this.zoomScroll, containerLayout.areas.zoom);
+		optionContainer.addControl(this.zoomText, optionLayout.areas.zoomText);
+		optionContainer.addControl(this.zoomScroll, optionLayout.areas.zoom);
+
+		optionContainer.addControl(this.blinkCheckBox, optionLayout.areas.blink);
+		optionContainer.addControl(this.blinkText, optionLayout.areas.blinkText);
+
+		optionPager.SetContent(optionContainer.control);
+		optionPager.SetAdjustment(PagerAdjustment.FitWidth);
 
 		container.addControl(this.miniView.control, containerLayout.areas.miniView);
-		container.addControl(this.miniViewText, containerLayout.areas.miniViewText);
-		container.addControl(this.miniViewSwitch, containerLayout.areas.miniViewSwitch);
-
-		container.addControl(this.themeText, containerLayout.areas.themeText);
-		container.addControl(this.themeSwitch, containerLayout.areas.themeSwitch);
+		container.addControl(optionPager, containerLayout.areas.option);
 
 		return container;
 	}
