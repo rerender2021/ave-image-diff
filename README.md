@@ -1,5 +1,5 @@
 <p align="center">
-    <img width="200" src="./assets/logo.svg">
+    <img width="450" src="./assets/logo.svg">
 </p>
 
 <!-- <h1 align="center">Image Diff</h1> -->
