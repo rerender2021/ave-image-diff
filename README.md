@@ -1,8 +1,8 @@
 <p align="center">
-    <img width="200" src="./assets/compare.png">
+    <img width="450" src="./assets/logo.svg">
 </p>
 
-<h1 align="center">Image Diff</h1>
+<!-- <h1 align="center">Image Diff</h1> -->
 
 English | [简体中文](./README_zh-cn.md)
 
